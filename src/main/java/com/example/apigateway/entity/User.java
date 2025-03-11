@@ -1,8 +1,6 @@
 package com.example.apigateway.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +14,7 @@ import java.util.List;
 @Getter
 public class User implements UserDetails {
     @Id
+    @GeneratedValue
     private Long userId;
 
     private String id;
@@ -24,8 +23,16 @@ public class User implements UserDetails {
 
     private String nickname;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserRole> userRoles;
+
+    public void addRole(UserRole userRole) {
+        this.userRoles.add(userRole);
+    }
+
+    public void removeRole(UserRole userRole) {
+        this.userRoles.remove(userRole);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
