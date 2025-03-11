@@ -1,4 +1,4 @@
-package com.example.apigateway;
+package com.example.apigateway.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
