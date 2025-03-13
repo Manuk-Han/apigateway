@@ -10,6 +10,7 @@ import com.example.apigateway.repository.redis.UserRefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,13 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-validity-in-second}")
     private long refreshTokenExpTime;
 
-    private final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    private SecretKey key;
+
+    @PostConstruct
+    public void init() {
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    }
+
 
     public Object getPrincipal(String nickname) {
         return userRepository.findByNickname(nickname)
