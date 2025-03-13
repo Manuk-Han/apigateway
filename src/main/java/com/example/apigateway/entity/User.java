@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -24,7 +25,7 @@ public class User implements UserDetails {
     private String nickname;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UserRole> userRoles;
+    private Set<UserRole> userRoles;
 
     public void addRole(UserRole userRole) {
         this.userRoles.add(userRole);

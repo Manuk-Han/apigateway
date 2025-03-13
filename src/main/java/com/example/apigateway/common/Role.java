@@ -24,6 +24,15 @@ public enum Role {
         return roles;
     }
 
+    public static Role findRole(String roleName) {
+        for (Role role : Role.values()) {
+            if (role.getRoleName().equals(roleName)) {
+                return role;
+            }
+        }
+        return null;
+    }
+
     public static boolean containsRole(Role updateRole) {
         for (Role managerRole : Role.values()) {
             if (managerRole.getRoleName().equals(updateRole.getRoleName())) {
