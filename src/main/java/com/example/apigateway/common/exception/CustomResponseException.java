@@ -13,7 +13,7 @@ public enum CustomResponseException {
 
     // 400 error
     WRONG_VALUE(HttpStatus.BAD_REQUEST, "잘못된 형식입니다."),
-    WRONG_ACCOUNT_ID_OR_PASSWORD(HttpStatus.BAD_REQUEST,"아이디 또는 비밀번호가 틀렸습니다."),
+    NOT_FOUND_ACCOUNT(HttpStatus.BAD_REQUEST,"존해하지 않는 계정입니다."),
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "패스워드가 틀렸습니다."),
     WRONG_FILE_TYPE(HttpStatus.BAD_REQUEST, "잘못된 파일 형식입니다."),
 

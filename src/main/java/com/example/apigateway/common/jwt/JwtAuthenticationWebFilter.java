@@ -75,6 +75,10 @@ public class JwtAuthenticationWebFilter implements WebFilter {
     }
 
     private String removeBearerPrefix(String token) {
+        if (token == null)
+            return null;
+
         return token.replace("Bearer ", "");
     }
+
 }
