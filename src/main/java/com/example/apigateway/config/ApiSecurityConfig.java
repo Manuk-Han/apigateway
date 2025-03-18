@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -21,17 +23,21 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class ApiSecurityConfig {
 
+    private final WebFilter ipAddressFilter;
+
     private final JwtAuthenticationWebFilter jwtAuthenticationWebFilter;
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .addFilterAt(ipAddressFilter, SecurityWebFiltersOrder.FIRST)
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .authorizeExchange(auth -> auth
-                        .pathMatchers("/**").permitAll())
+                        .anyExchange().permitAll()
+                )
                 .build();
     }
 

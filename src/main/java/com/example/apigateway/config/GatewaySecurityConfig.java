@@ -1,8 +1,8 @@
 package com.example.apigateway.config;
 
 import com.example.apigateway.common.jwt.JwtAuthenticationWebFilter;
-import com.example.apigateway.config.endpoint.AuthEndPoint;
-import com.example.apigateway.config.endpoint.EndPoint;
+import com.example.apigateway.common.endpoint.AuthEndPoint;
+import com.example.apigateway.common.endpoint.EndPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

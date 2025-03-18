@@ -1,11 +1,8 @@
-package com.example.apigateway.config.endpoint;
+package com.example.apigateway.common.endpoint;
 
 import com.example.apigateway.common.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-
-import java.util.List;
 
 @Getter
 @AllArgsConstructor
