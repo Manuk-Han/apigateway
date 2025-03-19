@@ -5,16 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum AuthEndPoint implements EndPoint {
     SIGN_UP("/auth/sign-up"),
     SIGN_IN("/auth/sign-in"),
+    REFRESH("/auth/refresh"),
     SIGN_OUT("/auth/sign-out", Role.GUEST);
 
     private final String path;
     private final Role role;
 
+    private static final String PREFIX = "/auth";
+
     AuthEndPoint(String path) {
-        this(path, null);
+        this(PREFIX + path, null);
+    }
+
+    AuthEndPoint(String path, Role role) {
+        this.path = PREFIX + path;
+        this.role = role;
     }
 }

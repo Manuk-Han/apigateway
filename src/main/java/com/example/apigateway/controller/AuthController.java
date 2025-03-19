@@ -31,9 +31,14 @@ public class AuthController {
                 .build();
     }
 
+    @GetMapping("/sign-out")
+    public void signOut() {
+        // sign out
+    }
+
     @GetMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("RefreshToken") String refreshToken) {
-        String accessToken = authService.refresh(refreshToken);
+        String accessToken = authService.refreshAccessToken(refreshToken);
 
         return ResponseEntity.ok()
                 .header("Authorization", accessToken)

@@ -44,7 +44,7 @@ public class AuthService {
                 .build();
     }
 
-    public String refresh(String refreshToken) {
+    public String refreshAccessToken(String refreshToken) {
         String nickname = jwtTokenProvider.getNickname(refreshToken);
         userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN));
