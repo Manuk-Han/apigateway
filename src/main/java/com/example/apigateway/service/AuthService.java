@@ -2,6 +2,8 @@ package com.example.apigateway.service;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
+import com.example.apigateway.common.jwt.JwtTokenDto;
+import com.example.apigateway.common.jwt.JwtTokenProvider;
 import com.example.apigateway.entity.User;
 import com.example.apigateway.form.SignInForn;
 import com.example.apigateway.form.SignUpForm;
@@ -19,6 +21,8 @@ public class AuthService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     public void signUp(SignUpForm signUpForm) {
         userRepository.save(User.builder()
                 .accountId(signUpForm.getId())
@@ -27,12 +31,24 @@ public class AuthService {
                 .build());
     }
 
-    public void signIn(SignInForn signInForm) {
+    public JwtTokenDto signIn(SignInForn signInForm) {
         User user = userRepository.findByAccountId(signInForm.getId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 
         if (!bCryptPasswordEncoder.matches(signInForm.getPassword(), user.getPassword()))
             throw new CustomException(CustomResponseException.WRONG_PASSWORD);
 
+        return JwtTokenDto.builder()
+                .accessToken(jwtTokenProvider.generateAccessToken(user.getNickname(), user.getRoles()))
+                .refreshToken(jwtTokenProvider.generateRefreshToken(user.getNickname(), user.getRoles()))
+                .build();
+    }
+
+    public String refresh(String refreshToken) {
+        String nickname = jwtTokenProvider.getNickname(refreshToken);
+        userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN));
+
+        return jwtTokenProvider.refreshAccessToken(refreshToken);
     }
 }

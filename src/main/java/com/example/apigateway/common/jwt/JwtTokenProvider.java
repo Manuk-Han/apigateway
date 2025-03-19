@@ -136,6 +136,7 @@ public class JwtTokenProvider {
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
+
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info(CustomResponseException.INVALID_TOKEN.getMessage(), e);

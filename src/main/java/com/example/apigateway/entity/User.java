@@ -1,6 +1,8 @@
 package com.example.apigateway.entity;
 
+import com.example.apigateway.common.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -27,10 +30,18 @@ public class User implements UserDetails {
 
     private String password;
 
+    @NotBlank
+    @Column(unique = true)
     private String nickname;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<UserRole> userRoles;
+
+    public Set<Role> getRoles() {
+        return this.userRoles.stream()
+                .map(UserRole::getRole)
+                .collect(Collectors.toSet());
+    }
 
     public void addRole(UserRole userRole) {
         this.userRoles.add(userRole);
