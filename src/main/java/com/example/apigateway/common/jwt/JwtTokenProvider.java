@@ -34,7 +34,7 @@ public class JwtTokenProvider {
 
     private final UserRefreshTokenRepository userRefreshTokenRepository;
 
-    private final static String IDENTIFIER_KEY = "nickname";
+    private final static String IDENTIFIER_KEY = "user_id";
     private final static String ROLE = "role";
 
     private final static String PREFIX = "Bearer ";
@@ -56,8 +56,8 @@ public class JwtTokenProvider {
     }
 
 
-    public Object getPrincipal(String nickname) {
-        return userRepository.findByNickname(nickname)
+    public Object getPrincipal(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN)).getUserRoles();
     }
 
@@ -76,15 +76,19 @@ public class JwtTokenProvider {
         return claims.get(ROLE) == null ? null : Role.findRole(claims.get(ROLE).toString());
     }
 
-    public String generateAccessToken(String nickname, Set<Role> roles) {
-        return generateToken(nickname, roles, accessTokenExpTime);
+    public String generateAccessToken(Long userId, Set<Role> roles) {
+        return generateToken(userId, roles, accessTokenExpTime);
     }
 
-    public String generateRefreshToken(String nickname, Set<Role> roles) {
-        return generateToken(nickname, roles, refreshTokenExpTime);
+    public String generateRefreshToken(Long userId, Set<Role> roles) {
+        String refreshToken = generateToken(userId, roles, refreshTokenExpTime);
+
+        userRefreshTokenRepository.setValues(userId.toString(), refreshToken);
+
+        return refreshToken;
     }
 
-    public String getNickname(String token) {
+    public Long getUserId(String token) {
         String formattedToken = token.replace(PREFIX, "");
         Claims claims = parseClaims(formattedToken);
 
@@ -92,7 +96,7 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_TOKEN);
         }
 
-        return claims.get(IDENTIFIER_KEY).toString();
+        return (Long) claims.get(IDENTIFIER_KEY);
     }
 
     public Role getRole(String token) {
@@ -105,16 +109,16 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_REFRESH_TOKEN);
         }
 
-        String nickname = parseClaims(refreshToken).get(IDENTIFIER_KEY).toString();
+        Long userId = (Long) parseClaims(refreshToken).get(IDENTIFIER_KEY);
 
-        if (userRefreshTokenRepository.getValues(nickname) == null) {
+        if (userRefreshTokenRepository.getValues(userId.toString()) == null) {
             throw new CustomException(CustomResponseException.NOT_REFRESH_TOKEN);
         }
 
-        Object principal = getPrincipal(nickname);
+        Object principal = getPrincipal(userId);
         Set<Role> roles = getRoles(principal);
 
-        return generateAccessToken(nickname, roles);
+        return generateAccessToken(userId, roles);
     }
 
     public Authentication getAuthentication(String token) {
@@ -124,8 +128,8 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_TOKEN);
         }
 
-        String nickname = claims.get(IDENTIFIER_KEY).toString();
-        UserDetails principal = (UserDetails)getPrincipal(nickname);
+        Long userId = (Long) claims.get(IDENTIFIER_KEY);
+        UserDetails principal = (UserDetails)getPrincipal(userId);
 
         return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
     }
@@ -150,9 +154,9 @@ public class JwtTokenProvider {
         return false;
     }
 
-    public String generateToken(String nickname, Set<Role> roles, long expireTime) {
+    public String generateToken(Long userId, Set<Role> roles, long expireTime) {
         Claims claims = Jwts.claims()
-                .add(IDENTIFIER_KEY, nickname)
+                .add(IDENTIFIER_KEY, userId)
                 .add(ROLE, roles)
                 .build();
 

@@ -43,7 +43,17 @@ public class JwtAuthenticationWebFilter implements WebFilter {
                 Authentication authentication = tokenProvider.getAuthentication(token);
                 SecurityContext securityContext = new SecurityContextImpl(authentication);
 
-                return chain.filter(exchange)
+                Long userId = tokenProvider.getUserId(token);
+
+                ServerHttpRequest mutatedRequest = request.mutate()
+                        .header("X-USER-ID", String.valueOf(userId))
+                        .build();
+
+                ServerWebExchange mutatedExchange = exchange.mutate()
+                        .request(mutatedRequest)
+                        .build();
+
+                return chain.filter(mutatedExchange)
                         .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
             }
         }
@@ -67,6 +77,15 @@ public class JwtAuthenticationWebFilter implements WebFilter {
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.get("role", String.class);
+    }
+
+    private String getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(jwtSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("user_id", String.class);
     }
 
     private SecretKey jwtSecretKey() {

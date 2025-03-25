@@ -39,14 +39,14 @@ public class AuthService {
             throw new CustomException(CustomResponseException.WRONG_PASSWORD);
 
         return JwtTokenDto.builder()
-                .accessToken(jwtTokenProvider.generateAccessToken(user.getNickname(), user.getRoles()))
-                .refreshToken(jwtTokenProvider.generateRefreshToken(user.getNickname(), user.getRoles()))
+                .accessToken(jwtTokenProvider.generateAccessToken(user.getUserId(), user.getRoles()))
+                .refreshToken(jwtTokenProvider.generateRefreshToken(user.getUserId(), user.getRoles()))
                 .build();
     }
 
     public String refreshAccessToken(String refreshToken) {
-        String nickname = jwtTokenProvider.getNickname(refreshToken);
-        userRepository.findByNickname(nickname)
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
+        userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN));
 
         return jwtTokenProvider.refreshAccessToken(refreshToken);
