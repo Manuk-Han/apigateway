@@ -26,5 +26,8 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<CourseStudent> courseStudentList;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    private List<ProblemBank> problemBankList;
+
     private boolean deleted;
 }

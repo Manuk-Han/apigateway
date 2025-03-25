@@ -27,7 +27,6 @@ public class AuthService {
         userRepository.save(User.builder()
                 .accountId(signUpForm.getId())
                 .password(bCryptPasswordEncoder.encode(signUpForm.getPassword()))
-                .nickname(signUpForm.getNickname())
                 .build());
     }
 

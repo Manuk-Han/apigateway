@@ -24,16 +24,14 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class User implements UserDetails {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     private String accountId;
 
     private String password;
 
-    @NotBlank
-    @Column(unique = true)
-    private String nickname;
+    private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CourseStudent> courseStudentList;

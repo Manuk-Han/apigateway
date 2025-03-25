@@ -6,19 +6,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseStudent {
+public class Example {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseStudentId;
+    private Long exampleId;
+
+    private String inputExample;
+
+    private String outputExample;
 
     @ManyToOne
-    private Course course;
-
-    @ManyToOne
-    private User user;
+    @JoinColumn(name = "problem_id")
+    private Problem problem;
 }

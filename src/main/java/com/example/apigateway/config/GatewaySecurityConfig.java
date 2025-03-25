@@ -39,7 +39,6 @@ public class GatewaySecurityConfig {
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .authorizeExchange(auth -> applyAllAuth(auth, AuthEndPoint.values()))
-                .authorizeExchange(auth -> auth.pathMatchers("/**").permitAll())
                 .build();
     }
 

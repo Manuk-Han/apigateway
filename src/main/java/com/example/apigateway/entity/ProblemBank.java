@@ -6,19 +6,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseStudent {
+public class ProblemBank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseStudentId;
+    private Long problemBankId;
 
     @ManyToOne
     private Course course;
 
-    @ManyToOne
-    private User user;
+    @OneToMany(mappedBy = "problemBank", cascade = CascadeType.ALL)
+    private List<Problem> problemList;
 }
