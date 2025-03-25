@@ -4,7 +4,7 @@ import com.example.apigateway.common.Role;
 import lombok.Getter;
 
 @Getter
-public enum ClassEndPoint implements EndPoint {
+public enum CourseEndPoint implements EndPoint {
     CREATE("/create"),
     INVITE("/invite/**"),
     INVITE_WITH_FILE("/invite-file/**"),
@@ -14,13 +14,13 @@ public enum ClassEndPoint implements EndPoint {
     private final String path;
     private final Role role;
 
-    private static final String PREFIX = "/class";
+    private static final String PREFIX = "/course";
 
-    ClassEndPoint(String path) {
+    CourseEndPoint(String path) {
         this(PREFIX + path, Role.MANAGER);
     }
 
-    ClassEndPoint(String path, Role role) {
+    CourseEndPoint(String path, Role role) {
         this.path = PREFIX + path;
         this.role = role;
     }

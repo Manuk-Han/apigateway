@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,9 @@ public class User implements UserDetails {
     @NotBlank
     @Column(unique = true)
     private String nickname;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<CourseStudent> courseStudentList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<UserRole> userRoles;

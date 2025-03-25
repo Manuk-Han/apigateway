@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Profile({"8082"})
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/class")
-public class ClassController {
+@RequestMapping("/submit")
+public class SubmitController {
     @Value("${server.name}")
     private String name;
 
