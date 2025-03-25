@@ -1,15 +1,14 @@
 package com.example.apigateway.common.endpoint;
 
 import com.example.apigateway.common.Role;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 public enum AuthEndPoint implements EndPoint {
-    SIGN_UP("/auth/sign-up"),
-    SIGN_IN("/auth/sign-in"),
-    REFRESH("/auth/refresh"),
-    SIGN_OUT("/auth/sign-out", Role.GUEST);
+    SIGN_UP("/sign-up"),
+    SIGN_IN("/sign-in"),
+    REFRESH("/refresh"),
+    SIGN_OUT("/sign-out", Role.GUEST);
 
     private final String path;
     private final Role role;
