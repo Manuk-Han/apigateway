@@ -27,7 +27,7 @@ public class Reply {
     @JoinColumn(name = "parent_reply_id")
     private Reply parentReply;
 
-    @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reply> childReplyList;
 
     @ManyToOne

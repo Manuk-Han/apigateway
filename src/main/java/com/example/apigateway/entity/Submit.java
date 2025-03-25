@@ -34,7 +34,7 @@ public class Submit {
     @JoinColumn(name = "problem_id")
     private Problem problem;
 
-    @OneToOne(mappedBy = "submit")
+    @OneToOne(mappedBy = "submit", cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "result_id")
     private Result result;
 }

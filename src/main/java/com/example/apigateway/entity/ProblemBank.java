@@ -23,6 +23,6 @@ public class ProblemBank {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @OneToMany(mappedBy = "problemBank", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "problemBank", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Problem> problemList;
 }

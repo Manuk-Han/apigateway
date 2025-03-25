@@ -25,7 +25,7 @@ public class Problem {
 
     private String problemRestriction;
 
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Example> exampleList;
 
     private String exampleCode;
@@ -40,6 +40,6 @@ public class Problem {
     @JoinColumn(name = "problem_bank_id")
     private ProblemBank problemBank;
 
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Submit> submitList;
 }
