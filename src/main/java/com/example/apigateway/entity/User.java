@@ -33,6 +33,8 @@ public class User implements UserDetails {
 
     private String email;
 
+    private boolean withdraw;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CourseStudent> courseStudentList;
 

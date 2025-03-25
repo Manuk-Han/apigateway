@@ -20,6 +20,7 @@ public class ProblemBank {
     private Long problemBankId;
 
     @ManyToOne
+    @JoinColumn(name = "course_id")
     private Course course;
 
     @OneToMany(mappedBy = "problemBank", cascade = CascadeType.ALL)

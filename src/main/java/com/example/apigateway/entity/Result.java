@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseStudent {
+public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long courseStudentId;
+    private Long resultId;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    private int score;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String status;
+
+    @OneToOne
+    @JoinColumn(name = "submit_id")
+    private Submit submit;
 }

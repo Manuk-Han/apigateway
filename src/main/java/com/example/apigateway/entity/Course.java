@@ -15,12 +15,13 @@ import java.util.List;
 @NoArgsConstructor
 public class Course {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long courseId;
 
     private String courseName;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User owner;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)

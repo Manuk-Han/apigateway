@@ -37,5 +37,9 @@ public class Problem {
     private LocalDateTime endDate;
 
     @ManyToOne
+    @JoinColumn(name = "problem_bank_id")
     private ProblemBank problemBank;
+
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
+    private List<Submit> submitList;
 }
