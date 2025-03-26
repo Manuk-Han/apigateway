@@ -2,11 +2,7 @@ package com.example.apigateway.entity;
 
 import com.example.apigateway.common.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +23,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(unique = true)
     private String accountId;
 
     private String password;
@@ -53,6 +50,14 @@ public class User implements UserDetails {
 
     public void removeRole(UserRole userRole) {
         this.userRoles.remove(userRole);
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateWithdraw() {
+        this.withdraw = !this.withdraw;
     }
 
     @Override

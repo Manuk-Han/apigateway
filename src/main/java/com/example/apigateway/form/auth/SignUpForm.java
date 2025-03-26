@@ -1,12 +1,14 @@
-package com.example.apigateway.form;
+package com.example.apigateway.form.auth;
 
 import lombok.Data;
 import lombok.Getter;
 
 @Data
 @Getter
-public class SignInForn {
+public class SignUpForm {
     private String id;
 
     private String password;
+
+    private String email;
 }

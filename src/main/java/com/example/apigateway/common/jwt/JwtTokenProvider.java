@@ -57,8 +57,13 @@ public class JwtTokenProvider {
 
 
     public Object getPrincipal(Long userId) {
-        return userRepository.findById(userId)
+        User user = (User) userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN)).getUserRoles();
+
+        if (user.isWithdraw())
+            throw new CustomException(CustomResponseException.WITHDRAW_USER);
+
+        return user;
     }
 
     public Set<Role> getRoles(Object principal) {
@@ -189,5 +194,9 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token.replace(PREFIX, "")).getPayload().getExpiration();
 
         return expirationDate.toString();
+    }
+
+    public void invalidateToken(String token) {
+        userRefreshTokenRepository.deleteValues(getUserId(token).toString());
     }
 }

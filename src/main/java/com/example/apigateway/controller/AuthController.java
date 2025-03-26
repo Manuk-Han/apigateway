@@ -1,8 +1,7 @@
 package com.example.apigateway.controller;
 
 import com.example.apigateway.common.jwt.JwtTokenDto;
-import com.example.apigateway.form.SignInForn;
-import com.example.apigateway.form.SignUpForm;
+import com.example.apigateway.form.auth.*;
 import com.example.apigateway.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -22,7 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> signIn(SignInForn signInForm) {
+    public ResponseEntity<?> signIn(SignInForm signInForm) {
         JwtTokenDto jwtTokenDto = authService.signIn(signInForm);
 
         return ResponseEntity.ok()
@@ -32,8 +31,8 @@ public class AuthController {
     }
 
     @GetMapping("/sign-out")
-    public void signOut() {
-        // sign out
+    public void signOut(@RequestHeader("Authorization") String accessToken) {
+        authService.signOut(accessToken);
     }
 
     @GetMapping("/refresh")
@@ -43,5 +42,29 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header("Authorization", accessToken)
                 .build();
+    }
+
+    @PostMapping("/update-password")
+    public void updatePassword(@RequestHeader("Authorization") String accessToken, UpdatePasswordForm updatePasswordForm) {
+        authService.updatePassword(accessToken, updatePasswordForm);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<String> withdraw(@RequestHeader("Authorization") String accessToken, WithdrawForm withdrawForm) {
+        String accountId = authService.withdraw(accessToken, withdrawForm);
+
+        return ResponseEntity.ok(accountId);
+    }
+
+    @PostMapping("/cancel-withdraw")
+    public void cancelWithdraw(CancelWithdrawForm cancelWithdrawForm) {
+        authService.cancelWithdraw(cancelWithdrawForm);
+    }
+
+    @PostMapping("/check/cancel-withdraw")
+    public ResponseEntity<String> checkCancelWithdraw(String accountId, String code) {
+        String newPassword = authService.checkCancelWithdraw(accountId, code);
+
+        return ResponseEntity.ok(newPassword);
     }
 }

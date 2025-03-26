@@ -1,5 +1,6 @@
 package com.example.apigateway.entity;
 
+import com.example.apigateway.common.type.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,12 @@ public class Result {
 
     private int score;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    private String errorDetail;
+
+    private String feedback;
 
     @OneToOne
     @JoinColumn(name = "submit_id")

@@ -15,6 +15,10 @@ public enum CustomResponseException {
     WRONG_VALUE(HttpStatus.BAD_REQUEST, "잘못된 형식입니다."),
     NOT_FOUND_ACCOUNT(HttpStatus.BAD_REQUEST,"존해하지 않는 계정입니다."),
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "패스워드가 틀렸습니다."),
+    WITHDRAW_USER(HttpStatus.BAD_REQUEST, "탈퇴한 회원입니다."),
+    NOT_REGISTERED_EMAIL(HttpStatus.BAD_REQUEST, "이메일이 등록되어 있지 않습니다."),
+    INVALID_CODE(HttpStatus.BAD_REQUEST, "인증 코드가 유효하지 않습니다."),
+    CERTIFICATION_EXPIRED(HttpStatus.BAD_REQUEST, "인증 시간이 만료되었습니다."),
     WRONG_FILE_TYPE(HttpStatus.BAD_REQUEST, "잘못된 파일 형식입니다."),
 
     // 401 error
