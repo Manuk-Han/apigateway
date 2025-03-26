@@ -6,7 +6,9 @@ import lombok.Getter;
 @Data
 @Getter
 public class SignUpForm {
-    private String id;
+    private String name;
+
+    private String accountId;
 
     private String password;
 

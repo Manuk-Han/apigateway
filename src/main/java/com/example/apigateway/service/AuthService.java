@@ -40,7 +40,8 @@ public class AuthService {
 
     public void signUp(SignUpForm signUpForm) {
         userRepository.save(User.builder()
-                .accountId(signUpForm.getId())
+                .name(signUpForm.getName())
+                .accountId(signUpForm.getAccountId())
                 .password(bCryptPasswordEncoder.encode(signUpForm.getPassword()))
                 .build());
     }
