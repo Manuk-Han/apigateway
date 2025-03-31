@@ -41,4 +41,14 @@ public class CourseController {
     public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, MultipartFile file) throws IOException {
         return ResponseEntity.ok(courseService.addStudents(userId, courseId, file));
     }
+
+    @GetMapping("/kick/{courseId}")
+    public ResponseEntity<Long> kick(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, String studentId) throws IOException {
+        return ResponseEntity.ok(courseService.kickStudent(userId, courseId, studentId));
+    }
+
+    @GetMapping("/grade/{courseId}")
+    public ResponseEntity<Long> grade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId) throws IOException {
+        return ResponseEntity.ok(courseService.getCourseGrade(userId, courseId));
+    }
 }

@@ -21,6 +21,7 @@ public enum CustomResponseException {
     CERTIFICATION_EXPIRED(HttpStatus.BAD_REQUEST, "인증 시간이 만료되었습니다."),
     NOT_FOUND_COURSE(HttpStatus.BAD_REQUEST, "존재하지 않는 강의입니다."),
     WRONG_FILE_TYPE(HttpStatus.BAD_REQUEST, "잘못된 파일 형식입니다."),
+    NOT_COURSE_STUDENT(HttpStatus.BAD_REQUEST, "강의에 존재하지 않는 학생입니다."),
 
     // 401 error
     TOKEN_HAS_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
@@ -33,7 +34,7 @@ public enum CustomResponseException {
 
     // 500 error
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
-    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류");
+    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류"), ;
 
     private final HttpStatus httpStatus;
     private final String message;

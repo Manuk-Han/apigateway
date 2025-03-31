@@ -115,4 +115,40 @@ public class CourseService {
 
         return course.getCourseId();
     }
+
+    public Long kickStudent(Long userId, String courseUUid, String studentId) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (!course.getOwner().equals(user))
+            throw new CustomException(CustomResponseException.FORBIDDEN);
+
+        User student = userRepository.findByAccountId(studentId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        CourseStudent courseStudent = courseStudentRepository.findByCourseAndUser(course, student)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_COURSE_STUDENT));
+
+        courseStudentRepository.delete(courseStudent);
+
+        return course.getCourseId();
+    }
+
+    public Long getCourseGrade(Long userId, String courseUUid) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (!course.getOwner().equals(user))
+            throw new CustomException(CustomResponseException.FORBIDDEN);
+
+        //TODO: 제출 현상, 채점 현황 등 불러오기 필요
+
+        return course.getCourseId();
+    }
 }
