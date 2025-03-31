@@ -1,5 +1,6 @@
 package com.example.apigateway.controller;
 
+import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
 import com.example.apigateway.service.CourseService;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Profile({"8081"})
 @RequiredArgsConstructor
@@ -29,8 +32,13 @@ public class CourseController {
                 .body(courseService.updateCourse(userId, courseUpdateForm));
     }
 
+    @PostMapping("/invite/{courseId}")
+    public ResponseEntity<Long> inviteOne(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, AddStudentForm addStudentForm) throws IOException {
+        return ResponseEntity.ok(courseService.addStudent(userId, courseId, addStudentForm));
+    }
+
     @PostMapping("/invite-file/{courseId}")
-    public ResponseEntity<Long> uploadExcel(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, MultipartFile file) {
-        return ResponseEntity.ok(0L);
+    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, MultipartFile file) throws IOException {
+        return ResponseEntity.ok(courseService.addStudents(userId, courseId, file));
     }
 }

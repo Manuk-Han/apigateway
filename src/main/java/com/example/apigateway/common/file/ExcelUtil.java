@@ -1,6 +1,11 @@
 package com.example.apigateway.common.file;
 
+import com.example.apigateway.common.exception.CustomException;
+import com.example.apigateway.common.exception.CustomResponseException;
+import com.example.apigateway.entity.Course;
+import com.example.apigateway.entity.CourseStudent;
 import com.example.apigateway.entity.User;
+import com.example.apigateway.repository.CourseStudentRepository;
 import com.example.apigateway.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,9 +24,10 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class ExcelUtil {
     private final UserRepository userRepository;
+    private final CourseStudentRepository courseStudentRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void processExcel(MultipartFile file) throws IOException {
+    public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
         try (InputStream inputStream = file.getInputStream();
              Workbook workbook = new XSSFWorkbook(inputStream)) {
 
@@ -30,19 +36,31 @@ public class ExcelUtil {
                 if (row.getRowNum() == 0) continue;
 
                 String studentId = getCellValue(row.getCell(0));
-                if(userRepository.existsByAccountId(studentId)) continue;
 
-                String name = getCellValue(row.getCell(1));
-                String email = getCellValue(row.getCell(2));
-                String phone = getCellValue(row.getCell(3));
+                User student;
+                if (userRepository.existsByAccountId(studentId)) {
+                    student = userRepository.findByAccountId(studentId)
+                            .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+                } else {
+                    String name = getCellValue(row.getCell(1));
+                    String email = getCellValue(row.getCell(2));
+                    String phone = getCellValue(row.getCell(3));
 
-                userRepository.save(
-                        User.builder()
-                                .name(name)
-                                .accountId(studentId)
-                                .password(passwordEncoder.encode(phone.substring(phone.length() - 4)))
-                                .email(email)
-                                .withdraw(false)
+                    student = User.builder()
+                            .name(name)
+                            .accountId(studentId)
+                            .password(passwordEncoder.encode(phone.substring(phone.length() - 4)))
+                            .email(email)
+                            .withdraw(false)
+                            .build();
+
+                    userRepository.save(student);
+                }
+
+                courseStudentRepository.save(
+                        CourseStudent.builder()
+                                .course(course)
+                                .user(student)
                                 .build()
                 );
             }
