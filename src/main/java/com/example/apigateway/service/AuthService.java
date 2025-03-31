@@ -43,6 +43,8 @@ public class AuthService {
                 .name(signUpForm.getName())
                 .accountId(signUpForm.getAccountId())
                 .password(bCryptPasswordEncoder.encode(signUpForm.getPassword()))
+                .email(signUpForm.getEmail())
+                .withdraw(false)
                 .build());
     }
 
