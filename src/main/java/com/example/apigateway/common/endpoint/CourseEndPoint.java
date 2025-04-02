@@ -5,7 +5,10 @@ import lombok.Getter;
 
 @Getter
 public enum CourseEndPoint implements EndPoint {
+    LIST("/list", Role.USER),
+    OWN_LIST("/own-list"),
     CREATE("/create"),
+    UPDATE("/update"),
     INVITE("/invite/**"),
     INVITE_WITH_FILE("/invite-file/**"),
     KICK("/kick/**"),

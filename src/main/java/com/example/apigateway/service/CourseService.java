@@ -3,6 +3,7 @@ package com.example.apigateway.service;
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
+import com.example.apigateway.dto.CourseDto;
 import com.example.apigateway.entity.Course;
 import com.example.apigateway.entity.CourseStudent;
 import com.example.apigateway.entity.User;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Profile("8081")
 @Service
@@ -30,6 +33,32 @@ public class CourseService {
     private final CourseStudentRepository courseStudentRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExcelUtil excelUtil;
+
+    public List<CourseDto> getOwnCourseList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        List<Course> courseList = courseRepository.findAllByOwner(user);
+
+        return courseList.stream()
+                .map(course -> CourseDto.builder()
+                        .courseName(course.getCourseName())
+                        .courseUUid(course.getCourseUUid())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<CourseDto> getCourseList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        return user.getCourseStudentList().stream()
+                .map(courseStudent -> CourseDto.builder()
+                        .courseName(courseStudent.getCourse().getCourseName())
+                        .courseUUid(courseStudent.getCourse().getCourseUUid())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
     public String createCourse(Long userId, CourseCreateForm courseCreateForm) {
         User user = userRepository.findById(userId)

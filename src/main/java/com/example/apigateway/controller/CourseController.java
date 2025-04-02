@@ -1,5 +1,6 @@
 package com.example.apigateway.controller;
 
+import com.example.apigateway.dto.CourseDto;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Profile({"8081"})
 @RequiredArgsConstructor
@@ -19,6 +21,18 @@ import java.io.IOException;
 @RequestMapping("/course")
 public class CourseController {
     private final CourseService courseService;
+
+    @GetMapping("/list")
+    public ResponseEntity<List<CourseDto>> courseList(@RequestHeader("X-USER-ID") Long userId) {
+        return ResponseEntity.ok()
+                .body(courseService.getCourseList(userId));
+    }
+
+    @GetMapping("/own-list")
+    public ResponseEntity<List<CourseDto>> ownCourseList(@RequestHeader("X-USER-ID") Long userId) {
+        return ResponseEntity.ok()
+                .body(courseService.getOwnCourseList(userId));
+    }
 
     @PostMapping("/create")
     public ResponseEntity<String> create(@RequestHeader("X-USER-ID") Long userId, CourseCreateForm courseCreateForm) {
