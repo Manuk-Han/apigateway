@@ -14,12 +14,15 @@ import com.example.apigateway.repository.CourseRepository;
 import com.example.apigateway.repository.CourseStudentRepository;
 import com.example.apigateway.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -93,6 +96,25 @@ public class CourseService {
         return course.getCourseUUid();
     }
 
+    public String deleteCourse(Long userId, String courseUUid) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+            Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+            if (!course.getOwner().equals(user))
+                throw new CustomException(CustomResponseException.FORBIDDEN);
+
+            courseRepository.delete(course);
+        } catch (Exception e) {
+            throw new CustomException(CustomResponseException.SERVER_ERROR);
+        }
+
+        return courseUUid;
+    }
+
     public Long addStudent(Long userId, String courseUUid, AddStudentForm addStudentForm) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
@@ -130,7 +152,20 @@ public class CourseService {
         return course.getCourseId();
     }
 
-    public Long addStudents(Long userId, String courseUUid, MultipartFile file) throws IOException {
+    @Value("${file.sample.path}")
+    private String sampleExcelFilePath;
+
+    public byte[] getSampleExcel() throws IOException {
+        File file = new File(sampleExcelFilePath);
+
+        if (!file.exists()) {
+            throw new CustomException(CustomResponseException.FILE_NOT_FOUND);
+        }
+
+        return Files.readAllBytes(file.toPath());
+    }
+
+    public Long addStudentsByFile(Long userId, String courseUUid, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 

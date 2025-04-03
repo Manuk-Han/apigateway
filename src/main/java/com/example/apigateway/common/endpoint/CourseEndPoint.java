@@ -9,8 +9,10 @@ public enum CourseEndPoint implements EndPoint {
     OWN_LIST("/own-list"),
     CREATE("/create"),
     UPDATE("/update"),
+    DELETE("/delete/**"),
     INVITE("/invite/**"),
-    INVITE_WITH_FILE("/invite-file/**"),
+    DOWNLOAD_SAMPLE_FILE("/invite/download/sample"),
+    INVITE_BY_FILE("/invite-file/**"),
     KICK("/kick/**"),
     GRADE("/grade/**");
 
