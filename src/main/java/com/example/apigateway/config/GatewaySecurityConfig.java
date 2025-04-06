@@ -38,10 +38,14 @@ public class GatewaySecurityConfig {
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
-                .authorizeExchange(auth -> auth.pathMatchers("/","/swagger-ui/**", "/v3/api-docs/**", "/ws/**", "/wss/**").permitAll())
-                .authorizeExchange(auth -> applyAllAuth(auth, AuthEndPoint.values()))
+                .authorizeExchange(auth -> applyAllAuth(
+                        auth
+                                .pathMatchers("/webjars/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll(),
+                        AuthEndPoint.values()
+                ))
                 .build();
     }
+
 
     @Bean
     public WebFilter corsFilter() {
