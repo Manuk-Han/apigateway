@@ -38,6 +38,7 @@ public class GatewaySecurityConfig {
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
+                .authorizeExchange(auth -> auth.pathMatchers("/","/swagger-ui/**", "/v3/api-docs/**", "/ws/**", "/wss/**").permitAll())
                 .authorizeExchange(auth -> applyAllAuth(auth, AuthEndPoint.values()))
                 .build();
     }
