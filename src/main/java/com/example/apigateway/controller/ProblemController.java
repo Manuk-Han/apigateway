@@ -16,13 +16,4 @@ public class ProblemController {
     @Value("${server.name}")
     private String name;
 
-    @GetMapping("/detail/{problemId}")
-    public String test1(@PathVariable Long problemId) {
-        return name + " " + problemId;
-    }
-
-    @GetMapping("/detail/{problemId}")
-    public String test2(@PathVariable Long problemId) {
-        return name + " " + problemId;
-    }
 }

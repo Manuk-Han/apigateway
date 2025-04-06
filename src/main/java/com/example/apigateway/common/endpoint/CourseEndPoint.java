@@ -14,7 +14,8 @@ public enum CourseEndPoint implements EndPoint {
     DOWNLOAD_SAMPLE_FILE("/invite/download/sample"),
     INVITE_BY_FILE("/invite-file/**"),
     KICK("/kick/**"),
-    GRADE("/grade/**");
+    ALL_GRADE("/all/grade/**"),
+    PROBLEM_GRADE("/problem/grade/**");
 
     private final String path;
     private final Role role;

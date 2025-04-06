@@ -82,12 +82,12 @@ public class CourseController {
         return ResponseEntity.ok(courseService.kickStudent(userId, courseId, studentId));
     }
 
-    @GetMapping("/grade/{courseId}")
+    @GetMapping("/all/grade/{courseId}")
     public ResponseEntity<List<CourseGradeDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGrade(userId, courseId));
     }
 
-    @GetMapping("/grade/{courseId}")
+    @GetMapping("/problem/grade/{courseId}")
     public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, Long problemId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseId, problemId));
     }
