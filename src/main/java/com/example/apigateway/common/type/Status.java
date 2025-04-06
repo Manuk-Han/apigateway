@@ -10,7 +10,8 @@ public enum Status {
     WRONG("WRONG"),
     REJECT("REJECTED"),
     PASS("PASS"),
-    ERROR("ERROR");
+    ERROR("ERROR"),
+    NOT_SUBMITTED("NOT_SUBMITTED");
 
     private final String languageName;
 }

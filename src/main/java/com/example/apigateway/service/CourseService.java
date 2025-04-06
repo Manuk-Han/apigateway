@@ -3,16 +3,14 @@ package com.example.apigateway.service;
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
-import com.example.apigateway.dto.CourseDto;
-import com.example.apigateway.entity.Course;
-import com.example.apigateway.entity.CourseStudent;
-import com.example.apigateway.entity.User;
+import com.example.apigateway.common.type.Status;
+import com.example.apigateway.dto.course.CourseDto;
+import com.example.apigateway.dto.course.CourseGradeDto;
+import com.example.apigateway.entity.*;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
-import com.example.apigateway.repository.CourseRepository;
-import com.example.apigateway.repository.CourseStudentRepository;
-import com.example.apigateway.repository.UserRepository;
+import com.example.apigateway.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -23,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,6 +33,7 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final SubmitRepository submitRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExcelUtil excelUtil;
 
@@ -87,8 +87,7 @@ public class CourseService {
         Course course = courseRepository.findById(courseUpdateForm.getCourseId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        validateCourseOwner(user, course);
 
         course.updateCourse(courseUpdateForm);
         courseRepository.save(course);
@@ -104,8 +103,7 @@ public class CourseService {
             Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                     .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-            if (!course.getOwner().equals(user))
-                throw new CustomException(CustomResponseException.FORBIDDEN);
+            validateCourseOwner(user, course);
 
             courseRepository.delete(course);
         } catch (Exception e) {
@@ -122,8 +120,7 @@ public class CourseService {
         Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        validateCourseOwner(user, course);
 
         User student;
 
@@ -154,6 +151,7 @@ public class CourseService {
 
     @Value("${file.sample.path}")
     private String sampleExcelFilePath;
+    private final ProblemRepository problemRepository;
 
     public byte[] getSampleExcel() throws IOException {
         File file = new File(sampleExcelFilePath);
@@ -172,8 +170,7 @@ public class CourseService {
         Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        validateCourseOwner(user, course);
 
         excelUtil.addStudentByExcel(course, file);
 
@@ -187,8 +184,7 @@ public class CourseService {
         Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        validateCourseOwner(user, course);
 
         User student = userRepository.findByAccountId(studentId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
@@ -201,18 +197,76 @@ public class CourseService {
         return course.getCourseId();
     }
 
-    public Long getCourseGrade(Long userId, String courseUUid) throws IOException {
+    public List<CourseGradeDto> getCourseGrade(Long userId, String courseUUid) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 
         Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        validateCourseOwner(user, course);
 
-        //TODO: 제출 현상, 채점 현황 등 불러오기 필요
+        List<CourseGradeDto> courseGradeList = new ArrayList<>();
 
-        return course.getCourseId();
+        course.getProblemBank().getProblemList().forEach(
+                problem -> course.getCourseStudentList().forEach(
+                        student -> courseGradeList.add(makeCourseGradeDto(student.getUser(), problem,
+                                submitRepository.findTopScoreSubmitByProblemAndStudent(problem.getProblemId(), student.getUser().getUserId())))
+                )
+        );
+
+        return courseGradeList;
     }
+
+    public List<CourseGradeDto> getCourseGradeWithProblem(Long userId, String courseUUid, Long problemId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        validateCourseOwner(user, course);
+
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
+
+        List<CourseGradeDto> courseGradeList = new ArrayList<>();
+
+        course.getCourseStudentList().forEach(
+                student -> courseGradeList.add(makeCourseGradeDto(student.getUser(), problem,
+                        submitRepository.findTopScoreSubmitByProblemAndStudent(problem.getProblemId(), student.getUser().getUserId())))
+        );
+
+        return courseGradeList;
+    }
+
+    private CourseGradeDto makeCourseGradeDto(User student, Problem problem, Submit submit) {
+        return submit == null ?
+                CourseGradeDto.builder()
+                        .accountId(student.getAccountId())
+                        .studentName(student.getName())
+                        .problemId(problem.getProblemId())
+                        .problemTitle(problem.getProblemTitle())
+                        .status(Status.NOT_SUBMITTED)
+                        .score(0)
+                        .submitId(null)
+                        .build()
+                :
+                CourseGradeDto.builder()
+                        .accountId(student.getAccountId())
+                        .studentName(student.getName())
+                        .problemId(problem.getProblemId())
+                        .problemTitle(problem.getProblemTitle())
+                        .score(submit.getResult().getScore())
+                        .status(submit.getResult().getStatus())
+                        .submitId(submit.getSubmitId())
+                        .build();
+    }
+
+    private void validateCourseOwner(User user, Course course) {
+        if (!course.getOwner().equals(user)) {
+            throw new CustomException(CustomResponseException.FORBIDDEN);
+        }
+    }
+
 }

@@ -35,8 +35,8 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<CourseStudent> courseStudentList;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<ProblemBank> problemBankList;
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL)
+    private ProblemBank problemBank;
 
     private boolean deleted;
 

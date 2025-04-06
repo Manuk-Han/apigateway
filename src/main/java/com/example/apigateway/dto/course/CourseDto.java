@@ -1,4 +1,4 @@
-package com.example.apigateway.dto;
+package com.example.apigateway.dto.course;
 
 import lombok.*;
 

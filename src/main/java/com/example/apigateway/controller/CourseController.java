@@ -1,6 +1,7 @@
 package com.example.apigateway.controller;
 
-import com.example.apigateway.dto.CourseDto;
+import com.example.apigateway.dto.course.CourseDto;
+import com.example.apigateway.dto.course.CourseGradeDto;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -82,7 +83,12 @@ public class CourseController {
     }
 
     @GetMapping("/grade/{courseId}")
-    public ResponseEntity<Long> grade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId) throws IOException {
+    public ResponseEntity<List<CourseGradeDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGrade(userId, courseId));
+    }
+
+    @GetMapping("/grade/{courseId}")
+    public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, Long problemId) throws IOException {
+        return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseId, problemId));
     }
 }

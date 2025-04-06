@@ -19,7 +19,7 @@ public class ProblemBank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long problemBankId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "course_id")
     private Course course;
 
