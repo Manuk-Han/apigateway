@@ -1,5 +1,6 @@
 package com.example.apigateway.common.file;
 
+import com.example.apigateway.common.type.TestCaseType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,7 @@ public class FileUtil {
 
         String fileName = UUID.randomUUID() + extension;
         File saveFile = new File(directory, fileName);
-        file.transferTo(saveFile); // 파일 저장
+        file.transferTo(saveFile);
 
         return baseDir + "/" + fileName;
     }

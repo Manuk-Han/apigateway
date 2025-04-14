@@ -33,6 +33,7 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final ProblemBankRepository problemBankRepository;
     private final SubmitRepository submitRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExcelUtil excelUtil;
@@ -76,6 +77,11 @@ public class CourseService {
                 .build();
 
         courseRepository.save(course);
+        problemBankRepository.save(
+                ProblemBank.builder()
+                        .course(course)
+                        .build()
+        );
 
         return course.getCourseUUid();
     }

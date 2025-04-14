@@ -2,33 +2,33 @@ package com.example.apigateway.service;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
-import com.example.apigateway.entity.Course;
-import com.example.apigateway.entity.Problem;
-import com.example.apigateway.entity.ProblemBank;
-import com.example.apigateway.entity.User;
+import com.example.apigateway.common.file.ExcelUtil;
+import com.example.apigateway.common.file.FileUtil;
+import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
-import com.example.apigateway.repository.CourseRepository;
-import com.example.apigateway.repository.ProblemBankRepository;
-import com.example.apigateway.repository.ProblemRepository;
-import com.example.apigateway.repository.UserRepository;
+import com.example.apigateway.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Profile("8081")
 @Service
 @RequiredArgsConstructor
 public class ProblemService {
     private final UserRepository userRepository;
-
     private final CourseRepository courseRepository;
-
     private final ProblemBankRepository problemBankRepository;
-
+    private final RestrictionRepository restrictionRepository;
+    private final ExampleRepository exampleRepository;
     private final ProblemRepository problemRepository;
+    private final ExcelUtil excelUtil;
 
-    public Long createProblem(Long userId, String courseUUid, ProblemCreateForm problemCreateForm) {
+    public Long createProblem(Long userId, String courseUUid, ProblemCreateForm problemCreateForm, MultipartFile testCaseFile) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 
@@ -37,17 +37,40 @@ public class ProblemService {
 
         validateCourseOwner(user, course);
 
-        if (problemBankRepository.existsByCourse(course)) {
-            ProblemBank problemBank = problemBankRepository.findByCourse(course);
+        ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
-            Problem problem = Problem.builder()
-                    .problemTitle(problemCreateForm.getProblemTitle())
-                    .problemDescription(problemCreateForm.getProblemDescription())
-//                    .problemRestriction(problemCreateForm.getProblemRestriction())
-                    .build();
-        }
+        Problem problem = Problem.builder()
+                .problemTitle(problemCreateForm.getProblemTitle())
+                .problemDescription(problemCreateForm.getProblemDescription())
+                .exampleCode(problemCreateForm.getExampleCode())
+                .startDate(problemCreateForm.getStartDate())
+                .endDate(problemCreateForm.getEndDate())
+                .problemBank(problemBank)
+                .build();
+        problemRepository.save(problem);
 
-        return null;
+        restrictionRepository.saveAll(problemCreateForm.getProblemRestriction()
+                .stream()
+                .map(restriction -> Restriction.builder()
+                        .restrictionDescription(restriction)
+                        .problem(problem)
+                        .build())
+                .toList());
+
+        exampleRepository.saveAll(problemCreateForm.getExampleList()
+                .stream()
+                .map(example -> Example.builder()
+                        .inputExample(example.getInputExample())
+                        .outputExample(example.getInputExample())
+                        .problem(problem)
+                        .build())
+                .toList());
+
+        excelUtil.addTestCaseByExcel(problem, testCaseFile);
+
+        problemRepository.save(problem);
+
+        return problem.getProblemId();
     }
 
     private void validateCourseOwner(User user, Course course) {

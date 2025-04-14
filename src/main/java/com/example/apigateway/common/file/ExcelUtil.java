@@ -2,10 +2,9 @@ package com.example.apigateway.common.file;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
-import com.example.apigateway.entity.Course;
-import com.example.apigateway.entity.CourseStudent;
-import com.example.apigateway.entity.User;
+import com.example.apigateway.entity.*;
 import com.example.apigateway.repository.CourseStudentRepository;
+import com.example.apigateway.repository.TestCaseRepository;
 import com.example.apigateway.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -20,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Profile("8081")
 @Component
@@ -27,6 +29,8 @@ import java.io.InputStream;
 public class ExcelUtil {
     private final UserRepository userRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final TestCaseRepository testCaseRepository;
+    private final FileUtil fileUtil;
     private final PasswordEncoder passwordEncoder;
 
     public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
@@ -69,6 +73,40 @@ public class ExcelUtil {
         }
     }
 
+    public void addTestCaseByExcel(Problem problem, MultipartFile file) throws IOException {
+        try (InputStream inputStream = file.getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            int num = 1;
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue;
+
+                String input = getCellValue(row.getCell(0));
+                String output = getCellValue(row.getCell(1));
+
+                if (input.isEmpty() || output.isEmpty()) {
+                    throw new CustomException(CustomResponseException.INVALID_TESTCASE);
+                }
+
+                saveStringToFile(input, "/problem/" + problem.getProblemId() + "/testcase/input" + num + ".txt");
+                saveStringToFile(output, "/problem/" + problem.getProblemId() + "/testcase/output" + num + ".txt");
+            }
+
+            String savedFileName = fileUtil.save(file, "/problem/" + problem.getProblemId() + "/excel/");
+
+            testCaseRepository.save(
+                    TestCase.builder()
+                            .problem(problem)
+                            .savedFileName(savedFileName)
+                            .originalFileName(file.getOriginalFilename())
+                            .filePath("/problem/" + problem.getProblemId() + "/excel/")
+                            .build()
+            );
+        }
+    }
+
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
         return switch (cell.getCellType()) {
@@ -77,5 +115,10 @@ public class ExcelUtil {
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
+    }
+
+    public static void saveStringToFile(String content, String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        Files.write(path, content.getBytes());
     }
 }

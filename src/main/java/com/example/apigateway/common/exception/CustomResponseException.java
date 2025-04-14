@@ -24,6 +24,7 @@ public enum CustomResponseException {
     NOT_COURSE_STUDENT(HttpStatus.BAD_REQUEST, "강의에 존재하지 않는 학생입니다."),
     FILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "파일을 찾을 수 없습니다."),
     NOT_FOUND_PROBLEM(HttpStatus.BAD_REQUEST, "문제를 찾을 수 없습니다."),
+    INVALID_TESTCASE(HttpStatus.BAD_REQUEST, "잘못된 테스트케이스입니다."),
 
     // 401 error
     TOKEN_HAS_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),

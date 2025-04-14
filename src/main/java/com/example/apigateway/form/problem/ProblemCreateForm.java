@@ -19,8 +19,6 @@ public class ProblemCreateForm {
 
     private String exampleCode;
 
-    private String problemCode;
-
     private LocalDate startDate;
 
     private LocalDate endDate;
