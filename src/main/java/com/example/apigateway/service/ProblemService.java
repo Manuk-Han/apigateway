@@ -146,7 +146,7 @@ public class ProblemService {
         }
     }
 
-    private ProblemDetailDto getProblemDetail(Long userId, String courseUUId, Long problemId) {
+    public ProblemDetailDto getProblemDetail(Long userId, String courseUUId, Long problemId) {
         Course course = validateCourseStudent(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);

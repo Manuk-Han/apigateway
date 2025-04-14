@@ -1,5 +1,6 @@
 package com.example.apigateway.controller;
 
+import com.example.apigateway.dto.problem.ProblemDetailDto;
 import com.example.apigateway.dto.problem.ProblemDto;
 import com.example.apigateway.form.problem.ProblemCreateForm;
 import com.example.apigateway.form.problem.ProblemUpdateForm;
@@ -25,6 +26,12 @@ public class ProblemController {
     public ResponseEntity<List<ProblemDto>> getProblemList(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId) {
         return ResponseEntity.ok()
                 .body(problemService.getProblemList(userId, courseUUId));
+    }
+
+    @GetMapping("/detail/{courseUUId}")
+    public ResponseEntity<ProblemDetailDto> getProblemDetail(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) {
+        return ResponseEntity.ok()
+                .body(problemService.getProblemDetail(userId, courseUUId, problemId));
     }
 
     @PostMapping("/create/{courseUUId}")
