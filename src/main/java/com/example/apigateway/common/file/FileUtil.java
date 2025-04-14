@@ -31,7 +31,7 @@ public class FileUtil {
         return baseDir + "/" + fileName;
     }
 
-    public String getFilePath(String filePath, String originalFileName) throws IOException {
+    public static String getFilePath(String filePath, String originalFileName) throws IOException {
         String path = System.getProperty("user.dir") + filePath;
 
         String extension = "";

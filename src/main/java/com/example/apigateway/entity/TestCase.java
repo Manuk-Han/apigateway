@@ -22,7 +22,7 @@ public class TestCase {
 
     private String filePath;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "problem_id")
     private Problem problem;
 }

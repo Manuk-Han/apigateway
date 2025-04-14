@@ -3,7 +3,8 @@ package com.example.apigateway.service;
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
-import com.example.apigateway.common.file.FileUtil;
+import com.example.apigateway.dto.problem.ExampleDto;
+import com.example.apigateway.dto.problem.ProblemDetailDto;
 import com.example.apigateway.dto.problem.ProblemDto;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
@@ -11,7 +12,6 @@ import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -144,6 +144,34 @@ public class ProblemService {
                                 .build())
                     .toList();
         }
+    }
+
+    private ProblemDetailDto getProblemDetail(Long userId, String courseUUId, Long problemId) {
+        Course course = validateCourseStudent(userId, courseUUId);
+
+        ProblemBank problemBank = problemBankRepository.findByCourse(course);
+
+        Problem problem = problemRepository.findByProblemIdAndProblemBank(problemId, problemBank).orElseThrow(
+                () -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
+
+        return ProblemDetailDto.builder()
+                .problemId(problem.getProblemId())
+                .problemTitle(problem.getProblemTitle())
+                .restrictionList(problem.getRestrictionList()
+                        .stream()
+                        .map(Restriction::getRestrictionDescription)
+                        .collect(Collectors.toList()))
+                .exampleList(problem.getExampleList()
+                        .stream()
+                        .map(example -> ExampleDto.builder()
+                                .exampleInput(example.getInputExample())
+                                .exampleOutput(example.getOutputExample())
+                                .build())
+                        .collect(Collectors.toList()))
+                .exampleCode(problem.getExampleCode())
+                .startDate(problem.getStartDate())
+                .endDate(problem.getEndDate())
+                .build();
     }
     
     private boolean checkManager(Long userId, String courseUUId) {

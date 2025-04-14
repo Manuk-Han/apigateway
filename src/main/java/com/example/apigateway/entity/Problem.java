@@ -32,8 +32,8 @@ public class Problem {
 
     private String exampleCode;
 
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TestCase> testCaseList;
+    @OneToOne(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TestCase testCase;
 
     private LocalDate startDate;
 
