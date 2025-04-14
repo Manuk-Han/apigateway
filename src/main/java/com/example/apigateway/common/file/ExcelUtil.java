@@ -94,8 +94,11 @@ public class ExcelUtil {
     }
 
     public void addTestCaseByExcel(Problem problem, MultipartFile file) throws IOException {
-        try (InputStream inputStream = file.getInputStream();
-             Workbook workbook = new XSSFWorkbook(inputStream)) {
+        try {
+            testCaseRepository.deleteTestCasesByProblem(problem);
+
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
 
             Sheet sheet = workbook.getSheetAt(0);
 
