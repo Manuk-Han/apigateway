@@ -1,5 +1,6 @@
 package com.example.apigateway.entity;
 
+import com.example.apigateway.form.problem.ProblemUpdateForm;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,4 +45,14 @@ public class Problem {
 
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Submit> submitList;
+
+    public Problem updateProblem(ProblemUpdateForm problemUpdateForm) {
+        this.problemTitle = problemUpdateForm.getProblemTitle();
+        this.problemDescription = problemUpdateForm.getProblemDescription();
+        this.exampleCode = problemUpdateForm.getExampleCode();
+        this.startDate = problemUpdateForm.getStartDate();
+        this.endDate = problemUpdateForm.getEndDate();
+
+        return this;
+    }
 }

@@ -6,6 +6,7 @@ import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.file.FileUtil;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
+import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -67,6 +68,48 @@ public class ProblemService {
                 .toList());
 
         excelUtil.addTestCaseByExcel(problem, testCaseFile);
+
+        problemRepository.save(problem);
+
+        return problem.getProblemId();
+    }
+
+    public Long updateProblem(Long userId, String courseUUid, ProblemUpdateForm problemUpdateForm, MultipartFile testCaseFile) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        validateCourseOwner(user, course);
+
+        Problem problem = problemRepository.findById(problemUpdateForm.getProblemId())
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
+
+        restrictionRepository.deleteRestrictionsByProblem(problem);
+        exampleRepository.deleteExamplesByProblem(problem);
+
+        problemRepository.save(problem.updateProblem(problemUpdateForm));
+
+        restrictionRepository.saveAll(problemUpdateForm.getProblemRestriction()
+                .stream()
+                .map(restriction -> Restriction.builder()
+                        .restrictionDescription(restriction)
+                        .problem(problem)
+                        .build())
+                .toList());
+
+        exampleRepository.saveAll(problemUpdateForm.getExampleList()
+                .stream()
+                .map(example -> Example.builder()
+                        .inputExample(example.getInputExample())
+                        .outputExample(example.getInputExample())
+                        .problem(problem)
+                        .build())
+                .toList());
+
+        if(testCaseFile != null)
+            excelUtil.addTestCaseByExcel(problem, testCaseFile);
 
         problemRepository.save(problem);
 
