@@ -4,6 +4,7 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.file.FileUtil;
+import com.example.apigateway.dto.problem.ProblemDto;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
 import com.example.apigateway.form.problem.ProblemUpdateForm;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Profile("8081")
 @Service
@@ -28,15 +30,10 @@ public class ProblemService {
     private final ExampleRepository exampleRepository;
     private final ProblemRepository problemRepository;
     private final ExcelUtil excelUtil;
+    private final CourseStudentRepository courseStudentRepository;
 
-    public Long createProblem(Long userId, String courseUUid, ProblemCreateForm problemCreateForm, MultipartFile testCaseFile) throws IOException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(user, course);
+    public Long createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, MultipartFile testCaseFile) throws IOException {
+        Course course = validateCourseOwner(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
@@ -74,14 +71,8 @@ public class ProblemService {
         return problem.getProblemId();
     }
 
-    public Long updateProblem(Long userId, String courseUUid, ProblemUpdateForm problemUpdateForm, MultipartFile testCaseFile) throws IOException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(user, course);
+    public Long updateProblem(Long userId, String courseUUId, ProblemUpdateForm problemUpdateForm, MultipartFile testCaseFile) throws IOException {
+        validateCourseOwner(userId, courseUUId);
 
         Problem problem = problemRepository.findById(problemUpdateForm.getProblemId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -115,10 +106,79 @@ public class ProblemService {
 
         return problem.getProblemId();
     }
+    
+    public void deleteProblem(Long userId, String courseUUId, Long problemId) {
+        Course course = validateCourseOwner(userId, courseUUId);
 
-    private void validateCourseOwner(User user, Course course) {
-        if (!course.getOwner().equals(user)) {
-            throw new CustomException(CustomResponseException.FORBIDDEN);
+        ProblemBank problemBank = problemBankRepository.findByCourse(course);
+
+        problemRepository.deleteProblemByProblemIdAndProblemBank(problemId, problemBank);
+    }
+    
+    public List<ProblemDto> getProblemList(Long userId, String courseUUId) {
+        if (checkManager(userId, courseUUId)) {
+            return problemBankRepository.findByCourse(courseRepository.findCourseBycourseUUId(courseUUId)
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE)))
+                    .getProblemList()
+                    .stream()
+                    .map(problem -> 
+                        ProblemDto.builder()
+                                .problemId(problem.getProblemId())
+                                .problemTitle(problem.getProblemTitle())
+                                .startDate(problem.getStartDate())
+                                .endDate(problem.getEndDate())
+                                .build())
+                    .toList();
+        } else {
+            Course course = validateCourseStudent(userId, courseUUId);
+            
+            return problemBankRepository.findByCourse(course)
+                    .getProblemList()
+                    .stream()
+                    .map(problem -> 
+                        ProblemDto.builder()
+                                .problemId(problem.getProblemId())
+                                .problemTitle(problem.getProblemTitle())
+                                .startDate(problem.getStartDate())
+                                .endDate(problem.getEndDate())
+                                .build())
+                    .toList();
         }
+    }
+    
+    private boolean checkManager(Long userId, String courseUUId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+        
+        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+        
+        return course.getOwner().equals(user);
+    }
+
+    private Course validateCourseOwner(Long userId, String courseUUId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+        
+        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (!course.getOwner().equals(user))
+            throw new CustomException(CustomResponseException.FORBIDDEN);
+        
+        return course;
+    }
+
+    private Course validateCourseStudent(Long userId, String courseUUId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+        
+        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (!courseStudentRepository.existsByCourseAndUser(course, user))
+            throw new CustomException(CustomResponseException.FORBIDDEN);
+        
+        return course;
     }
 }

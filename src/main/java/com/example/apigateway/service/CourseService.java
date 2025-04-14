@@ -88,11 +88,8 @@ public class CourseService {
         return course.getCourseUUid();
     }
 
-    public String updateCourse(Long userId, CourseUpdateForm courseUpdateForm) {
-        Course course = courseRepository.findById(courseUpdateForm.getCourseId())
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+    public String updateCourse(Long userId, String courseUUId, CourseUpdateForm courseUpdateForm) {
+        Course course = validateCourseOwner(userId, courseUUId);
 
         course.updateCourse(courseUpdateForm);
         courseRepository.save(course);
@@ -102,10 +99,7 @@ public class CourseService {
 
     public String deleteCourse(Long userId, String courseUUid) {
         try {
-            Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-            validateCourseOwner(userId, course);
+            Course course = validateCourseOwner(userId, courseUUid);
 
             courseRepository.delete(course);
         } catch (Exception e) {
@@ -116,10 +110,7 @@ public class CourseService {
     }
 
     public List<StudentInfoDTO> getStudentInfoList(Long userId, String courseUUid) {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         return course.getCourseStudentList().stream()
                 .map(courseStudent -> StudentInfoDTO.builder()
@@ -131,10 +122,7 @@ public class CourseService {
     }
 
     public Long addStudent(Long userId, String courseUUid, AddStudentForm addStudentForm) {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         User student;
 
@@ -179,10 +167,7 @@ public class CourseService {
     }
 
     public Long addStudentsByFile(Long userId, String courseUUid, MultipartFile file) throws IOException {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         excelUtil.addStudentByExcel(course, file);
 
@@ -190,10 +175,7 @@ public class CourseService {
     }
 
     public Long kickStudent(Long userId, String courseUUid, String studentId) throws IOException {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         User student = userRepository.findByAccountId(studentId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
@@ -207,10 +189,7 @@ public class CourseService {
     }
 
     public List<CourseGradeDto> getCourseGrade(Long userId, String courseUUid) {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         List<CourseGradeDto> courseGradeList = new ArrayList<>();
 
@@ -225,10 +204,7 @@ public class CourseService {
     }
 
     public List<CourseGradeDto> getCourseGradeWithProblem(Long userId, String courseUUid, Long problemId) {
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -266,21 +242,22 @@ public class CourseService {
                         .build();
     }
 
-    private void validateCourseOwner(Long userId, Course course) {
+    private Course validateCourseOwner(Long userId, String courseUUid) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseBycourseUUId(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
         if (!course.getOwner().equals(user)) {
             throw new CustomException(CustomResponseException.FORBIDDEN);
         }
+
+        return course;
     }
 
     public StudentInfoDTO getStudentInfo(Long userId, String accountId, String courseUUid) {
-
-        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        validateCourseOwner(userId, course);
+        Course course = validateCourseOwner(userId, courseUUid);
 
         User student = userRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));

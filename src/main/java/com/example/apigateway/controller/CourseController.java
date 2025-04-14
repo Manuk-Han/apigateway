@@ -43,10 +43,10 @@ public class CourseController {
                 .body(courseService.createCourse(userId, courseCreateForm));
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<String> update(@RequestHeader("X-USER-ID") Long userId, CourseUpdateForm courseUpdateForm) {
+    @PostMapping("/update/{courseUUId}")
+    public ResponseEntity<String> update(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, CourseUpdateForm courseUpdateForm) {
         return ResponseEntity.ok()
-                .body(courseService.updateCourse(userId, courseUpdateForm));
+                .body(courseService.updateCourse(userId, courseUUId, courseUpdateForm));
     }
 
     @GetMapping("/delete")

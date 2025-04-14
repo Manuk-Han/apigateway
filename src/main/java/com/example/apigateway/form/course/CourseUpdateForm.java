@@ -8,8 +8,6 @@ import java.time.LocalDate;
 @Data
 @Getter
 public class CourseUpdateForm {
-    private Long courseId;
-
     private String courseName;
 
     private LocalDate courseStart;
