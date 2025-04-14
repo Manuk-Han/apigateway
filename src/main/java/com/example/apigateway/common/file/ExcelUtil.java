@@ -4,6 +4,7 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.repository.CourseStudentRepository;
+import com.example.apigateway.repository.ParticipantRepository;
 import com.example.apigateway.repository.TestCaseRepository;
 import com.example.apigateway.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,15 @@ import java.nio.file.Paths;
 public class ExcelUtil {
     private final UserRepository userRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final ParticipantRepository participantRepository;
     private final TestCaseRepository testCaseRepository;
     private final FileUtil fileUtil;
     private final PasswordEncoder passwordEncoder;
 
     public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
-        try (InputStream inputStream = file.getInputStream();
-             Workbook workbook = new XSSFWorkbook(inputStream)) {
+        try (
+                InputStream inputStream = file.getInputStream();
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
@@ -70,6 +73,19 @@ public class ExcelUtil {
                                 .build()
                 );
             }
+        } catch (IOException e) {
+            throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
+        } finally {
+            String savedFileName = fileUtil.save(file, "/course/" + course.getCourseId() + "/excel/");
+
+            participantRepository.save(
+                    Participant.builder()
+                            .course(course)
+                            .savedFileName(savedFileName)
+                            .originalFileName(file.getOriginalFilename())
+                            .filePath("/course/" + course.getCourseId() + "/excel/")
+                            .build()
+            );
         }
     }
 
@@ -93,7 +109,9 @@ public class ExcelUtil {
                 saveStringToFile(input, "/problem/" + problem.getProblemId() + "/testcase/input" + num + ".txt");
                 saveStringToFile(output, "/problem/" + problem.getProblemId() + "/testcase/output" + num + ".txt");
             }
-
+        } catch (IOException e) {
+            throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
+        } finally {
             String savedFileName = fileUtil.save(file, "/problem/" + problem.getProblemId() + "/excel/");
 
             testCaseRepository.save(

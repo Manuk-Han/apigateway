@@ -38,6 +38,9 @@ public class Course {
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL)
     private ProblemBank problemBank;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Participant> participantList;
+
     private boolean deleted;
 
     public void updateCourse(CourseUpdateForm courseUpdateForm) {
