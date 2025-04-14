@@ -1,5 +1,6 @@
 package com.example.apigateway.repository;
 
+import com.example.apigateway.common.type.InviteType;
 import com.example.apigateway.entity.Course;
 import com.example.apigateway.entity.CourseStudent;
 import com.example.apigateway.entity.User;
@@ -13,4 +14,6 @@ public interface CourseStudentRepository extends JpaRepository<CourseStudent, Lo
     Optional<CourseStudent> findByCourseAndUser(Course course, User user);
 
     boolean existsByCourseAndUser(Course course, User user);
+
+    void deleteCourseStudentsByCourseAndInviteType(Course course, InviteType inviteType);
 }

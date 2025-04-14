@@ -2,6 +2,7 @@ package com.example.apigateway.common.file;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
+import com.example.apigateway.common.type.InviteType;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.repository.CourseStudentRepository;
 import com.example.apigateway.repository.ParticipantRepository;
@@ -36,9 +37,11 @@ public class ExcelUtil {
     private final PasswordEncoder passwordEncoder;
 
     public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
-        try (
-                InputStream inputStream = file.getInputStream();
-                Workbook workbook = new XSSFWorkbook(inputStream)) {
+        try {
+            courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
+
+            InputStream inputStream = file.getInputStream();
+            Workbook workbook = new XSSFWorkbook(inputStream);
 
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
@@ -70,6 +73,7 @@ public class ExcelUtil {
                         CourseStudent.builder()
                                 .course(course)
                                 .user(student)
+                                .inviteType(InviteType.FILE)
                                 .build()
                 );
             }

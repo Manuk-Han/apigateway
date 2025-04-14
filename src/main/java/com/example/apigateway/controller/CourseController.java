@@ -55,6 +55,16 @@ public class CourseController {
                 .body(courseService.deleteCourse(userId, courseUUid));
     }
 
+    @GetMapping("/student/info/list/{courseUUId}")
+    public ResponseEntity<List<StudentInfoDTO>> getStudentInfoList(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId) throws IOException {
+        return ResponseEntity.ok(courseService.getStudentInfoList(userId, courseUUId));
+    }
+
+    @GetMapping("/student/info/{courseUUId}")
+    public ResponseEntity<StudentInfoDTO> getStudentInfo(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, String studentId) throws IOException {
+        return ResponseEntity.ok(courseService.getStudentInfo(userId, studentId, courseUUId));
+    }
+
     @PostMapping("/invite/{courseUUId}")
     public ResponseEntity<Long> inviteOne(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, AddStudentForm addStudentForm) throws IOException {
         return ResponseEntity.ok(courseService.addStudent(userId, courseUUId, addStudentForm));
@@ -91,10 +101,5 @@ public class CourseController {
     @GetMapping("/problem/grade/{courseUUId}")
     public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseUUId, problemId));
-    }
-
-    @GetMapping("/student/info/{courseUUId}")
-    public ResponseEntity<StudentInfoDTO> getStudentInfo(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, String studentId) throws IOException {
-        return ResponseEntity.ok(courseService.getStudentInfo(studentId, courseUUId));
     }
 }

@@ -1,6 +1,5 @@
 package com.example.apigateway.common.file;
 
-import com.example.apigateway.common.type.TestCaseType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

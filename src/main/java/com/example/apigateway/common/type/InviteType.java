@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum TestCaseType {
-    IN(".in"),
-    OUT(".out");
+public enum InviteType {
+    ONE("one"),
+    FILE("file"),;
 
-    private final String fileExtension;
+    private final String inviteType;
 }
