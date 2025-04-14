@@ -9,11 +9,10 @@ public enum AuthEndPoint implements EndPoint {
     SIGN_IN("/sign-in"),
     REFRESH("/refresh"),
     UPDATE_PASSWORD("/update-password"),
-    WITHDRAWAL("/withdraw"),
-    SIGN_OUT("/sign-out", Role.GUEST);
-
-//    CANCEL_WITHDRAWAL("/cancel-withdraw")
-//    CHECK_CANCEL_WITHDRAWAL("/check-cancel-withdraw")
+    WITHDRAWAL("/withdraw", Role.USER),
+    CANCEL_WITHDRAWAL("/cancel-withdraw", Role.USER),
+    CHECK_WITHDRAWAL("/check/cancel-withdraw", Role.ADMIN),
+    SIGN_OUT("/sign-out", Role.USER);
 
     private final String path;
     private final Role role;

@@ -8,6 +8,8 @@ public enum ProblemEndPoint implements EndPoint {
     CREATE("/create", Role.MANAGER),
     UPDATE("/update/**", Role.MANAGER),
     DELETE("/delete/**", Role.MANAGER),
+    LIST("/list/**"),
+    DETAIL("/detail/**"),
     MANAGER_PROBLEM_LIST("/admin/all/**", Role.MANAGER),
     MANAGER_PROBLEM_DETAIL("/admin/**", Role.MANAGER),
     REJUDGE("/rejudge/**", Role.MANAGER),
