@@ -2,6 +2,7 @@ package com.example.apigateway.controller;
 
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
+import com.example.apigateway.dto.course.StudentInfoDTO;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -54,9 +55,9 @@ public class CourseController {
                 .body(courseService.deleteCourse(userId, courseUUid));
     }
 
-    @PostMapping("/invite/{courseId}")
-    public ResponseEntity<Long> inviteOne(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, AddStudentForm addStudentForm) throws IOException {
-        return ResponseEntity.ok(courseService.addStudent(userId, courseId, addStudentForm));
+    @PostMapping("/invite/{courseUUId}")
+    public ResponseEntity<Long> inviteOne(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, AddStudentForm addStudentForm) throws IOException {
+        return ResponseEntity.ok(courseService.addStudent(userId, courseUUId, addStudentForm));
     }
 
     @GetMapping("/invite/sample/download")
@@ -72,23 +73,28 @@ public class CourseController {
                 .body(fileContent);
     }
 
-    @PostMapping("/invite-file/{courseId}")
-    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, MultipartFile file) throws IOException {
-        return ResponseEntity.ok(courseService.addStudentsByFile(userId, courseId, file));
+    @PostMapping("/invite-file/{courseUUId}")
+    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, MultipartFile file) throws IOException {
+        return ResponseEntity.ok(courseService.addStudentsByFile(userId, courseUUId, file));
     }
 
-    @GetMapping("/kick/{courseId}")
-    public ResponseEntity<Long> kick(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, String studentId) throws IOException {
-        return ResponseEntity.ok(courseService.kickStudent(userId, courseId, studentId));
+    @GetMapping("/kick/{courseUUId}")
+    public ResponseEntity<Long> kick(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, String studentId) throws IOException {
+        return ResponseEntity.ok(courseService.kickStudent(userId, courseUUId, studentId));
     }
 
-    @GetMapping("/all/grade/{courseId}")
-    public ResponseEntity<List<CourseGradeDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId) throws IOException {
-        return ResponseEntity.ok(courseService.getCourseGrade(userId, courseId));
+    @GetMapping("/all/grade/{courseUUId}")
+    public ResponseEntity<List<CourseGradeDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId) throws IOException {
+        return ResponseEntity.ok(courseService.getCourseGrade(userId, courseUUId));
     }
 
-    @GetMapping("/problem/grade/{courseId}")
-    public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseId, Long problemId) throws IOException {
-        return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseId, problemId));
+    @GetMapping("/problem/grade/{courseUUId}")
+    public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) throws IOException {
+        return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseUUId, problemId));
+    }
+
+    @GetMapping("/student/info/{courseUUId}")
+    public ResponseEntity<StudentInfoDTO> getStudentInfo(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, String studentId) throws IOException {
+        return ResponseEntity.ok(courseService.getStudentInfo(studentId, courseUUId));
     }
 }

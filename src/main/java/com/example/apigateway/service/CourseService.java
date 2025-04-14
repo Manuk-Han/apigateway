@@ -6,6 +6,7 @@ import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.type.Status;
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
+import com.example.apigateway.dto.course.StudentInfoDTO;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
@@ -273,6 +274,23 @@ public class CourseService {
         if (!course.getOwner().equals(user)) {
             throw new CustomException(CustomResponseException.FORBIDDEN);
         }
+    }
+
+    public StudentInfoDTO getStudentInfo(String accountId, String courseUUid) {
+        User student = userRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (courseStudentRepository.existsByCourseAndUser(course, student))
+            throw new CustomException(CustomResponseException.NOT_COURSE_STUDENT);
+
+        return StudentInfoDTO.builder()
+                .accountId(student.getAccountId())
+                .name(student.getName())
+                .email(student.getEmail())
+                .build();
     }
 
 }
