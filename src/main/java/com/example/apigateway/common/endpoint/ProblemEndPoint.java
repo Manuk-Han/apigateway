@@ -8,13 +8,12 @@ public enum ProblemEndPoint implements EndPoint {
     CREATE("/create", Role.MANAGER),
     UPDATE("/update/**", Role.MANAGER),
     DELETE("/delete/**", Role.MANAGER),
-    LIST("/list/**"),
-    DETAIL("/detail/**"),
+    PROBLEM_LIST("/list/**"),
+    PROBLEM_DETAIL("/detail/**"),
     MANAGER_PROBLEM_LIST("/admin/all/**", Role.MANAGER),
     MANAGER_PROBLEM_DETAIL("/admin/**", Role.MANAGER),
-    REJUDGE("/rejudge/**", Role.MANAGER),
-    PROBLEM_LIST("/all/**"),
-    PROBLEM_DETAIL("/**");
+//    REJUDGE("/rejudge/**", Role.MANAGER),
+    ;
 
     private final String path;
     private final Role role;
