@@ -22,6 +22,8 @@ public class Result {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private double executionTime;
+
     private String errorDetail;
 
     private String feedback;

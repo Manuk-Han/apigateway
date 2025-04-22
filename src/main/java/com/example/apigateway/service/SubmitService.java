@@ -5,6 +5,7 @@ import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.kafka.KafkaSubmitForm;
 import com.example.apigateway.common.type.Language;
 import com.example.apigateway.entity.*;
+import com.example.apigateway.form.result.ReceiveResultForm;
 import com.example.apigateway.form.submit.SubmitForm;
 import com.example.apigateway.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,7 @@ public class SubmitService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final ResultRepository resultRepository;
 
     public Long submitProblem(Long userId, String courseUUId, Long problemId, SubmitForm submitForm) throws IOException {
         Course course = validateCourseStudent(userId, courseUUId);
@@ -60,6 +62,21 @@ public class SubmitService {
         kafkaTemplate.send(topic, payload);
 
         return problem.getProblemId();
+    }
+
+    public void receiveSubmitResult(ReceiveResultForm resultForm) {
+        Submit submit = submitRepository.findById(resultForm.getSubmissionId())
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
+
+        Result result = Result.builder()
+                .submit(submit)
+                .score(resultForm.getScore())
+                .status(resultForm.getStatus())
+                .executionTime(resultForm.getExecutionTime())
+                .errorDetail(resultForm.getErrorDetail())
+                .build();
+
+        resultRepository.save(result);
     }
 
     private Course validateCourseOwner(Long userId, String courseUUId) {

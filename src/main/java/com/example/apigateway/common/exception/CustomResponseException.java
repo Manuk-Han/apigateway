@@ -27,6 +27,8 @@ public enum CustomResponseException {
     INVALID_TESTCASE(HttpStatus.BAD_REQUEST, "잘못된 테스트케이스입니다."),
     INVALID_EXCEL_FILE(HttpStatus.BAD_REQUEST, "잘못된 엑셀 파일입니다."),
     INVALID_TEST_CASE_FILE(HttpStatus.BAD_REQUEST, "잘못된 테스트케이스 파일입니다."),
+    UNKNOWN_LANGUAGE(HttpStatus.BAD_REQUEST, "알 수 없는 언어입니다."),
+    NOT_FOUND_SUBMIT(HttpStatus.BAD_REQUEST, "제출을 찾을 수 없습니다."),
 
     // 401 error
     TOKEN_HAS_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
@@ -39,8 +41,7 @@ public enum CustomResponseException {
 
     // 500 error
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
-    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류"),
-    UNKNOWN_LANGUAGE(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 언어입니다."),;
+    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류"), ;
 
     private final HttpStatus httpStatus;
     private final String message;
