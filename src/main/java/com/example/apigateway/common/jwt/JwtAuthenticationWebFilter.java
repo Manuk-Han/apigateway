@@ -1,6 +1,5 @@
 package com.example.apigateway.common.jwt;
 
-import com.example.apigateway.common.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

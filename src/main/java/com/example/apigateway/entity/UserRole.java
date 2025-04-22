@@ -1,6 +1,6 @@
 package com.example.apigateway.entity;
 
-import com.example.apigateway.common.Role;
+import com.example.apigateway.common.type.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 

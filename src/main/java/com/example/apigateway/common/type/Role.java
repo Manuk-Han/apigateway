@@ -1,4 +1,4 @@
-package com.example.apigateway.common;
+package com.example.apigateway.common.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

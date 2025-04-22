@@ -1,6 +1,5 @@
 package com.example.apigateway.dto.result;
 
-import com.example.apigateway.common.type.Language;
 import com.example.apigateway.common.type.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

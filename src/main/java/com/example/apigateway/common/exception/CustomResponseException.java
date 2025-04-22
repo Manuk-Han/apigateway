@@ -39,7 +39,8 @@ public enum CustomResponseException {
 
     // 500 error
     SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
-    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류"), ;
+    IOE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "입출력 오류"),
+    UNKNOWN_LANGUAGE(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 언어입니다."),;
 
     private final HttpStatus httpStatus;
     private final String message;

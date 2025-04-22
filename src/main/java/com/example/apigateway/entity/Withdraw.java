@@ -1,6 +1,5 @@
 package com.example.apigateway.entity;
 
-import com.example.apigateway.common.type.Language;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

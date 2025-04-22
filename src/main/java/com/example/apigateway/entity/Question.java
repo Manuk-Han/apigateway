@@ -1,13 +1,11 @@
 package com.example.apigateway.entity;
 
-import com.example.apigateway.common.type.Language;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity

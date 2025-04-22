@@ -1,6 +1,6 @@
 package com.example.apigateway.common.jwt;
 
-import com.example.apigateway.common.Role;
+import com.example.apigateway.common.type.Role;
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.entity.User;

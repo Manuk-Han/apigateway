@@ -1,5 +1,6 @@
 package com.example.apigateway.common.type;
 
+import com.example.apigateway.common.exception.CustomResponseException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,4 +14,13 @@ public enum Language {
 
     private final String languageName;
     private final String fileExtension;
+
+    public static Language getLanguage(String language) {
+        for (Language languageEnum : Language.values()){
+            if (languageEnum.languageName.equals(language)){
+                return languageEnum;
+            }
+        }
+        throw new IllegalArgumentException(language + CustomResponseException.UNKNOWN_LANGUAGE);
+    }
 }
