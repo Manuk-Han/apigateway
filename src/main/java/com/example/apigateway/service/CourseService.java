@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Profile("8081")
+@Profile("class")
 @Service
 @RequiredArgsConstructor
 public class CourseService {
@@ -246,7 +246,7 @@ public class CourseService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 
-        Course course = courseRepository.findCourseBycourseUUId(courseUUid)
+        Course course = courseRepository.findCourseByCourseUUid(courseUUid)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
         if (!course.getOwner().equals(user)) {

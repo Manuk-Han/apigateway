@@ -25,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Profile("8081")
+@Profile("class")
 @Component
 @RequiredArgsConstructor
 public class ExcelUtil {

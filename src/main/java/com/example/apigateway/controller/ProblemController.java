@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-@Profile({"8081"})
+@Profile({"class"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/problem")

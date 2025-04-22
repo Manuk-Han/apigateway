@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Profile("8081")
+@Profile("class")
 @Service
 @RequiredArgsConstructor
 public class ProblemService {
@@ -117,7 +117,7 @@ public class ProblemService {
     
     public List<ProblemDto> getProblemList(Long userId, String courseUUId) {
         if (checkManager(userId, courseUUId)) {
-            return problemBankRepository.findByCourse(courseRepository.findCourseBycourseUUId(courseUUId)
+            return problemBankRepository.findByCourse(courseRepository.findCourseByCourseUUid(courseUUId)
                     .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE)))
                     .getProblemList()
                     .stream()
@@ -178,7 +178,7 @@ public class ProblemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
         
-        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+        Course course = courseRepository.findCourseByCourseUUid(courseUUId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
         
         return course.getOwner().equals(user);
@@ -188,7 +188,7 @@ public class ProblemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
         
-        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+        Course course = courseRepository.findCourseByCourseUUid(courseUUId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
         if (!course.getOwner().equals(user))
@@ -201,7 +201,7 @@ public class ProblemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
         
-        Course course = courseRepository.findCourseBycourseUUId(courseUUId)
+        Course course = courseRepository.findCourseByCourseUUid(courseUUId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
         if (!courseStudentRepository.existsByCourseAndUser(course, user))
