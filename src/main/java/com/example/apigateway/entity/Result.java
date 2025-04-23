@@ -24,11 +24,17 @@ public class Result {
 
     private double executionTime;
 
+    @Column(columnDefinition = "TEXT")
     private String errorDetail;
 
+    @Column(columnDefinition = "TEXT")
     private String feedback;
 
     @OneToOne
     @JoinColumn(name = "submit_id")
     private Submit submit;
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
 }

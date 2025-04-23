@@ -29,6 +29,7 @@ public enum CustomResponseException {
     INVALID_TEST_CASE_FILE(HttpStatus.BAD_REQUEST, "잘못된 테스트케이스 파일입니다."),
     UNKNOWN_LANGUAGE(HttpStatus.BAD_REQUEST, "알 수 없는 언어입니다."),
     NOT_FOUND_SUBMIT(HttpStatus.BAD_REQUEST, "제출을 찾을 수 없습니다."),
+    NOT_SCORE_YET(HttpStatus.BAD_REQUEST, "점수가 아직 채점되지 않았습니다."),
 
     // 401 error
     TOKEN_HAS_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),

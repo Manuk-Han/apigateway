@@ -1,6 +1,8 @@
 package com.example.apigateway.repository;
 
+import com.example.apigateway.entity.Problem;
 import com.example.apigateway.entity.Submit;
+import com.example.apigateway.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +29,8 @@ public interface SubmitRepository extends JpaRepository<Submit, Long> {
 """)
     Submit findTopScoreSubmitByProblemAndStudent(@Param("problemId") Long problemId,
                                                  @Param("studentId") Long studentId);
+
+    List<Submit> findSubmitsByProblemAndStudent(Problem problem, User student);
+
+    List<Submit> findSubmitsByProblem(Problem problem);
 }

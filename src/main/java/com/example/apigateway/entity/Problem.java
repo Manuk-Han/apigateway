@@ -30,6 +30,7 @@ public class Problem {
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Example> exampleList;
 
+    @Column(columnDefinition = "TEXT")
     private String exampleCode;
 
     @OneToOne(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)

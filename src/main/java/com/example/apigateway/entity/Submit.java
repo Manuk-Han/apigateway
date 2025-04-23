@@ -22,6 +22,7 @@ public class Submit {
     @Enumerated(EnumType.STRING)
     private Language language;
 
+    @Column(columnDefinition = "TEXT")
     private String code;
 
     private LocalDateTime submitTime;

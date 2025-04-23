@@ -12,18 +12,22 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResultDto {
+public class ResultDetailDto {
     private Long resultId;
 
     private Long submitId;
 
     private int score;
 
-    private Status status;
-
     private Language language;
+
+    private Status status;
 
     private LocalDateTime submitTime;
 
     private String accountId;
+
+    private String errorMessage;
+
+    private String feedback;
 }
