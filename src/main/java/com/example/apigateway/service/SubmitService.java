@@ -31,12 +31,12 @@ public class SubmitService {
     private final ObjectMapper objectMapper;
     private final ResultRepository resultRepository;
 
-    public Long submitProblem(Long userId, String courseUUId, Long problemId, SubmitForm submitForm) throws IOException {
+    public Long submitProblem(Long userId, String courseUUId, SubmitForm submitForm) throws IOException {
         Course course = validateService.validateCourseMember(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
-        Problem problem = problemRepository.findByProblemIdAndProblemBank(problemId, problemBank)
+        Problem problem = problemRepository.findByProblemIdAndProblemBank(submitForm.getProblemId(), problemBank)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
 
         Submit submit = Submit.builder()
@@ -65,17 +65,21 @@ public class SubmitService {
     }
 
     public void receiveSubmitResult(ReceiveResultForm resultForm) {
-        Submit submit = submitRepository.findById(resultForm.getSubmissionId())
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
+        try {
+            Submit submit = submitRepository.findById(resultForm.getSubmissionId())
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
 
-        Result result = Result.builder()
-                .submit(submit)
-                .score(resultForm.getScore())
-                .status(resultForm.getStatus())
-                .executionTime(resultForm.getExecutionTime())
-                .errorDetail(resultForm.getErrorDetail())
-                .build();
+            Result result = Result.builder()
+                    .submit(submit)
+                    .score(resultForm.getScore())
+                    .status(resultForm.getStatus())
+                    .executionTime(resultForm.getExecutionTime())
+                    .errorDetail(resultForm.getErrorDetail())
+                    .build();
 
-        resultRepository.save(result);
+            resultRepository.save(result);
+        } catch (Exception e) {
+            throw new CustomException(CustomResponseException.SERVER_ERROR);
+        }
     }
 }

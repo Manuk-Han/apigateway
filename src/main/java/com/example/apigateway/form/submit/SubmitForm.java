@@ -7,6 +7,8 @@ import lombok.Getter;
 @Data
 @Getter
 public class SubmitForm {
+    private Long problemId;
+
     private String code;
 
     private Language language;
