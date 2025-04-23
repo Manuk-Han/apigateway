@@ -26,13 +26,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
     private final JwtTokenProvider jwtTokenProvider;
-
     private final HtmlEmailService htmlEmailService;
-
     private final WithdrawRepository withdrawRepository;
 
     @Value("${server.domain}")

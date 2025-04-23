@@ -8,6 +8,7 @@ import com.example.apigateway.entity.*;
 import com.example.apigateway.form.result.ReceiveResultForm;
 import com.example.apigateway.form.submit.SubmitForm;
 import com.example.apigateway.repository.*;
+import com.example.apigateway.service.common.ValidateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -21,18 +22,17 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SubmitService {
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
     private final ProblemBankRepository problemBankRepository;
     private final ProblemRepository problemRepository;
-    private final CourseStudentRepository courseStudentRepository;
     private final SubmitRepository submitRepository;
+    private final ValidateService validateService;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ResultRepository resultRepository;
 
     public Long submitProblem(Long userId, String courseUUId, Long problemId, SubmitForm submitForm) throws IOException {
-        Course course = validateCourseStudent(userId, courseUUId);
+        Course course = validateService.validateCourseMember(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
@@ -77,31 +77,5 @@ public class SubmitService {
                 .build();
 
         resultRepository.save(result);
-    }
-
-    private Course validateCourseOwner(Long userId, String courseUUId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-
-        Course course = courseRepository.findCourseByCourseUUid(courseUUId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        if (!course.getOwner().equals(user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
-
-        return course;
-    }
-
-    private Course validateCourseStudent(Long userId, String courseUUId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-
-        Course course = courseRepository.findCourseByCourseUUid(courseUUId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
-
-        if (!courseStudentRepository.existsByCourseAndUser(course, user))
-            throw new CustomException(CustomResponseException.FORBIDDEN);
-
-        return course;
     }
 }
