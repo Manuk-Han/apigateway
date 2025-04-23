@@ -1,5 +1,6 @@
 package com.example.apigateway.common.endpoint;
 
+import com.example.apigateway.common.endpoint.common.EndPoint;
 import com.example.apigateway.common.type.Role;
 import lombok.Getter;
 

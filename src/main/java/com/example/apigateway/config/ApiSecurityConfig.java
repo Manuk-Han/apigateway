@@ -26,7 +26,6 @@ public class ApiSecurityConfig {
 
     private final WebFilter ipAddressFilter;
     private final JwtAuthenticationWebFilter jwtAuthenticationWebFilter;
-    private final ApiKeyFilter apiKeyFilter;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -39,7 +38,6 @@ public class ApiSecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .addFilterAt(ipAddressFilter, SecurityWebFiltersOrder.FIRST)
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
-                .addFilterBefore(apiKeyFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .authorizeExchange(auth -> auth

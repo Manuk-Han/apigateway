@@ -2,7 +2,7 @@ package com.example.apigateway.config;
 
 import com.example.apigateway.common.jwt.JwtAuthenticationWebFilter;
 import com.example.apigateway.common.endpoint.AuthEndPoint;
-import com.example.apigateway.common.endpoint.EndPoint;
+import com.example.apigateway.common.endpoint.common.EndPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +25,7 @@ import java.util.Collections;
 public class GatewaySecurityConfig {
 
     private final JwtAuthenticationWebFilter jwtAuthenticationWebFilter;
+    private final ApiKeyFilter apiKeyFilter;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -36,6 +37,7 @@ public class GatewaySecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .addFilterAt(corsFilter(), SecurityWebFiltersOrder.CORS)
+                .addFilterBefore(apiKeyFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .authorizeExchange(auth -> applyAllAuth(
