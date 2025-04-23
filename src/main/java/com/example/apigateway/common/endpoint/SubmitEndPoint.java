@@ -6,9 +6,8 @@ import lombok.Getter;
 @Getter
 public enum SubmitEndPoint implements EndPoint {
     SUBMIT_CODE(""),
-//    RECEIVE_RESULT("/receive"),
-    SUBMIT_LIST("/all/**"),
-    SUBMIT_DETAIL("/detail/**");
+//    RECEIVE_RESULT("/receive")
+    ;
 
     private final String path;
     private final Role role;
