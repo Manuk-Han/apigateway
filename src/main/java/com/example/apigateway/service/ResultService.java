@@ -2,22 +2,22 @@ package com.example.apigateway.service;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
-import com.example.apigateway.common.kafka.KafkaSubmitForm;
-import com.example.apigateway.common.type.Language;
 import com.example.apigateway.dto.result.ResultDetailDto;
 import com.example.apigateway.dto.result.ResultDto;
-import com.example.apigateway.entity.*;
-import com.example.apigateway.form.result.ReceiveResultForm;
-import com.example.apigateway.form.submit.SubmitForm;
-import com.example.apigateway.repository.*;
+import com.example.apigateway.entity.Course;
+import com.example.apigateway.entity.Problem;
+import com.example.apigateway.entity.Result;
+import com.example.apigateway.entity.User;
+import com.example.apigateway.form.result.FeedbackForm;
+import com.example.apigateway.repository.ProblemRepository;
+import com.example.apigateway.repository.ResultRepository;
+import com.example.apigateway.repository.SubmitRepository;
+import com.example.apigateway.repository.UserRepository;
 import com.example.apigateway.service.common.ValidateService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,13 +112,13 @@ public class ResultService {
                 .build();
     }
 
-    public Long setFeedback(Long userId, String courseUUId, Long resultId, String feedback) {
+    public Long setFeedback(Long userId, String courseUUId, FeedbackForm feedbackForm) {
         validateService.validateCourseOwner(userId, courseUUId);
 
-        Result result = resultRepository.findById(resultId)
+        Result result = resultRepository.findById(feedbackForm.getResultId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
 
-        result.setFeedback(feedback);
+        result.setFeedback(feedbackForm.getFeedback());
         resultRepository.save(result);
 
         return result.getResultId();
