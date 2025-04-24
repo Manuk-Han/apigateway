@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Profile("submit")
+@Profile("class")
 @Service
 @RequiredArgsConstructor
 public class ResultService {

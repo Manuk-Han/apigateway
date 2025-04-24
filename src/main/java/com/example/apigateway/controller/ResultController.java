@@ -3,16 +3,12 @@ package com.example.apigateway.controller;
 import com.example.apigateway.dto.result.ResultDetailDto;
 import com.example.apigateway.dto.result.ResultDto;
 import com.example.apigateway.form.result.FeedbackForm;
-import com.example.apigateway.form.result.ReceiveResultForm;
-import com.example.apigateway.form.submit.SubmitForm;
 import com.example.apigateway.service.ResultService;
-import com.example.apigateway.service.SubmitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @Profile({"class"})
