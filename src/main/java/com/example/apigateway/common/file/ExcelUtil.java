@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -21,9 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Profile("class")
 @Component
@@ -35,6 +33,8 @@ public class ExcelUtil {
     private final TestCaseRepository testCaseRepository;
     private final FileUtil fileUtil;
     private final PasswordEncoder passwordEncoder;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
         try {
@@ -113,8 +113,14 @@ public class ExcelUtil {
                     throw new CustomException(CustomResponseException.INVALID_TESTCASE);
                 }
 
-                saveStringToFile(input, "/problem/" + problem.getProblemId() + "/testcase/input" + num + ".txt");
-                saveStringToFile(output, "/problem/" + problem.getProblemId() + "/testcase/output" + num + ".txt");
+                applicationEventPublisher.publishEvent(
+                        TestcaseFileSaveEvent.builder()
+                                .inputContent(input)
+                                .outputContent(output)
+                                .problemId(problem.getProblemId())
+                                .num(num)
+                                .build()
+                );
             }
         } catch (IOException e) {
             throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
@@ -140,10 +146,5 @@ public class ExcelUtil {
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
-    }
-
-    public static void saveStringToFile(String content, String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        Files.write(path, content.getBytes());
     }
 }
