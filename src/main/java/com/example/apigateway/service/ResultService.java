@@ -13,7 +13,7 @@ import com.example.apigateway.repository.ProblemRepository;
 import com.example.apigateway.repository.ResultRepository;
 import com.example.apigateway.repository.SubmitRepository;
 import com.example.apigateway.repository.UserRepository;
-import com.example.apigateway.service.common.ValidateService;
+import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -28,12 +28,12 @@ public class ResultService {
     private final UserRepository userRepository;
     private final ProblemRepository problemRepository;
     private final SubmitRepository submitRepository;
-    private final ValidateService validateService;
+    private final ValidateUtil validateUtil;
 
     private final ResultRepository resultRepository;
 
     public List<ResultDto> getResultList(Long userId, String courseUUId, Long problemId) {
-        Course course = validateService.validateCourseMember(userId, courseUUId);
+        Course course = validateUtil.validateCourseMember(userId, courseUUId);
 
         Problem problem = problemRepository.findByProblemIdAndProblemBank(problemId, course.getProblemBank())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -65,7 +65,7 @@ public class ResultService {
     }
 
     public List<ResultDto> getResultListForClassOwner(Long userId, String courseUUId, Long problemId) {
-        Course course = validateService.validateCourseOwner(userId, courseUUId);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
         Problem problem = problemRepository.findByProblemIdAndProblemBank(problemId, course.getProblemBank())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -94,7 +94,7 @@ public class ResultService {
     }
 
     public ResultDetailDto getResultDetail(Long userId, String courseUUId, Long resultId) {
-        validateService.validateCourseMember(userId, courseUUId);
+        validateUtil.validateCourseMember(userId, courseUUId);
 
         Result result = resultRepository.findById(resultId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
@@ -113,7 +113,7 @@ public class ResultService {
     }
 
     public Long setFeedback(Long userId, String courseUUId, FeedbackForm feedbackForm) {
-        validateService.validateCourseOwner(userId, courseUUId);
+        validateUtil.validateCourseOwner(userId, courseUUId);
 
         Result result = resultRepository.findById(feedbackForm.getResultId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));

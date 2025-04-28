@@ -62,6 +62,13 @@ public class User implements UserDetails {
         this.withdraw = !this.withdraw;
     }
 
+    public Role getRole() {
+        return this.userRoles.stream()
+                .map(UserRole::getRole)
+                .findFirst()
+                .orElse(null);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();

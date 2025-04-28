@@ -10,7 +10,7 @@ import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
 import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.repository.*;
-import com.example.apigateway.service.common.ValidateService;
+import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -31,10 +31,10 @@ public class ProblemService {
     private final ExampleRepository exampleRepository;
     private final ProblemRepository problemRepository;
     private final ExcelUtil excelUtil;
-    private final ValidateService validateService;
+    private final ValidateUtil validateUtil;
 
     public Long createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, MultipartFile testCaseFile) throws IOException {
-        Course course = validateService.validateCourseOwner(userId, courseUUId);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
@@ -73,7 +73,7 @@ public class ProblemService {
     }
 
     public Long updateProblem(Long userId, String courseUUId, ProblemUpdateForm problemUpdateForm, MultipartFile testCaseFile) throws IOException {
-        validateService.validateCourseOwner(userId, courseUUId);
+        validateUtil.validateCourseOwner(userId, courseUUId);
 
         Problem problem = problemRepository.findById(problemUpdateForm.getProblemId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -109,7 +109,7 @@ public class ProblemService {
     }
     
     public void deleteProblem(Long userId, String courseUUId, Long problemId) {
-        Course course = validateService.validateCourseOwner(userId, courseUUId);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
@@ -131,7 +131,7 @@ public class ProblemService {
                                 .build())
                     .toList();
         } else {
-            Course course = validateService.validateCourseMember(userId, courseUUId);
+            Course course = validateUtil.validateCourseMember(userId, courseUUId);
             
             return problemBankRepository.findByCourse(course)
                     .getProblemList()
@@ -148,7 +148,7 @@ public class ProblemService {
     }
 
     public ProblemDetailDto getProblemDetail(Long userId, String courseUUId, Long problemId) {
-        Course course = validateService.validateCourseMember(userId, courseUUId);
+        Course course = validateUtil.validateCourseMember(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 

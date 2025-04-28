@@ -13,7 +13,7 @@ import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
 import com.example.apigateway.repository.*;
-import com.example.apigateway.service.common.ValidateService;
+import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -40,7 +40,7 @@ public class CourseService {
     private final SubmitRepository submitRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExcelUtil excelUtil;
-    private final ValidateService validateService;
+    private final ValidateUtil validateUtil;
 
     public List<CourseDto> getOwnCourseList(Long userId) {
         User user = userRepository.findById(userId)
@@ -91,7 +91,7 @@ public class CourseService {
     }
 
     public String updateCourse(Long userId, String courseUUId, CourseUpdateForm courseUpdateForm) {
-        Course course = validateService.validateCourseOwner(userId, courseUUId);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
         course.updateCourse(courseUpdateForm);
         courseRepository.save(course);
@@ -101,7 +101,7 @@ public class CourseService {
 
     public String deleteCourse(Long userId, String courseUUid) {
         try {
-            Course course = validateService.validateCourseOwner(userId, courseUUid);
+            Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
             courseRepository.delete(course);
         } catch (Exception e) {
@@ -112,7 +112,7 @@ public class CourseService {
     }
 
     public List<StudentInfoDTO> getStudentInfoList(Long userId, String courseUUid) {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         return course.getCourseStudentList().stream()
                 .map(courseStudent -> StudentInfoDTO.builder()
@@ -124,7 +124,7 @@ public class CourseService {
     }
 
     public Long addStudent(Long userId, String courseUUid, AddStudentForm addStudentForm) {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         User student;
 
@@ -169,7 +169,7 @@ public class CourseService {
     }
 
     public Long addStudentsByFile(Long userId, String courseUUid, MultipartFile file) throws IOException {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         excelUtil.addStudentByExcel(course, file);
 
@@ -177,7 +177,7 @@ public class CourseService {
     }
 
     public Long kickStudent(Long userId, String courseUUid, String studentId) throws IOException {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         User student = userRepository.findByAccountId(studentId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
@@ -191,7 +191,7 @@ public class CourseService {
     }
 
     public List<CourseGradeDto> getCourseGrade(Long userId, String courseUUid) {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         List<CourseGradeDto> courseGradeList = new ArrayList<>();
 
@@ -206,7 +206,7 @@ public class CourseService {
     }
 
     public List<CourseGradeDto> getCourseGradeWithProblem(Long userId, String courseUUid, Long problemId) {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
@@ -245,7 +245,7 @@ public class CourseService {
     }
 
     public StudentInfoDTO getStudentInfo(Long userId, String accountId, String courseUUid) {
-        Course course = validateService.validateCourseOwner(userId, courseUUid);
+        Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         User student = userRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));

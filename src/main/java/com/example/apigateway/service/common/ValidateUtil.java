@@ -2,6 +2,7 @@ package com.example.apigateway.service.common;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
+import com.example.apigateway.common.type.Role;
 import com.example.apigateway.entity.Course;
 import com.example.apigateway.entity.User;
 import com.example.apigateway.repository.CourseRepository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ValidateService {
+public class ValidateUtil {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CourseStudentRepository courseStudentRepository;
@@ -23,6 +24,9 @@ public class ValidateService {
 
         Course course = courseRepository.findCourseByCourseUUid(courseUUId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
+
+        if (user.getRole() == Role.ADMIN)
+            return course;
 
         if (!course.getOwner().equals(user))
             throw new CustomException(CustomResponseException.FORBIDDEN);

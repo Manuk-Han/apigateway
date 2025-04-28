@@ -8,7 +8,7 @@ import com.example.apigateway.entity.*;
 import com.example.apigateway.form.result.ReceiveResultForm;
 import com.example.apigateway.form.submit.SubmitForm;
 import com.example.apigateway.repository.*;
-import com.example.apigateway.service.common.ValidateService;
+import com.example.apigateway.service.common.ValidateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -25,14 +25,14 @@ public class SubmitService {
     private final ProblemBankRepository problemBankRepository;
     private final ProblemRepository problemRepository;
     private final SubmitRepository submitRepository;
-    private final ValidateService validateService;
+    private final ValidateUtil validateUtil;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ResultRepository resultRepository;
 
     public Long submitProblem(Long userId, String courseUUId, SubmitForm submitForm) throws IOException {
-        Course course = validateService.validateCourseMember(userId, courseUUId);
+        Course course = validateUtil.validateCourseMember(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
