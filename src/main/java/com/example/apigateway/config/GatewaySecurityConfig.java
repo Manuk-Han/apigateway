@@ -44,7 +44,7 @@ public class GatewaySecurityConfig {
                         auth
                                 .pathMatchers("/webjars/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll(),
                         AuthEndPoint.values()
-                ))
+                ).anyExchange().permitAll())
                 .build();
     }
 

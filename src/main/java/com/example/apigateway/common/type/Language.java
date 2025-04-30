@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Language {
-    C("c", ".c"),
+    C("docker/c", ".c"),
     CPP("c++", ".cpp"),
     JAVA("java", ".java"),
-    PYTHON("python", ".py");
+    PYTHON("docker/python", ".py");
 
     private final String languageName;
     private final String fileExtension;
