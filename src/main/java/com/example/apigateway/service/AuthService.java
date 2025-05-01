@@ -6,10 +6,13 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.jwt.JwtTokenDto;
 import com.example.apigateway.common.jwt.JwtTokenProvider;
+import com.example.apigateway.common.type.Role;
 import com.example.apigateway.entity.User;
+import com.example.apigateway.entity.UserRole;
 import com.example.apigateway.entity.Withdraw;
 import com.example.apigateway.form.auth.*;
 import com.example.apigateway.repository.UserRepository;
+import com.example.apigateway.repository.UserRoleRepository;
 import com.example.apigateway.repository.WithdrawRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final HtmlEmailService htmlEmailService;
@@ -35,13 +39,23 @@ public class AuthService {
     private String domain;
 
     public void signUp(SignUpForm signUpForm) {
-        userRepository.save(User.builder()
+        User user = User.builder()
                 .name(signUpForm.getName())
                 .accountId(signUpForm.getAccountId())
                 .password(bCryptPasswordEncoder.encode(signUpForm.getPassword()))
                 .email(signUpForm.getEmail())
                 .withdraw(false)
-                .build());
+                .build();
+
+        userRepository.save(user);
+
+        Role.getRoles(signUpForm.getRole())
+                .forEach(role -> userRoleRepository.save(
+                        UserRole.builder()
+                                .user(user)
+                                .role(role)
+                                .build()
+                ));
     }
 
     public JwtTokenDto signIn(SignInForm signInForm) {
