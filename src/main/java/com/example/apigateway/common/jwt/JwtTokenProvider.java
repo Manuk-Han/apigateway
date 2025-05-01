@@ -58,7 +58,7 @@ public class JwtTokenProvider {
 
     public Object getPrincipal(Long userId) {
         User user = (User) userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN)).getUserRoles();
+                .orElseThrow(() -> new CustomException(CustomResponseException.INVALID_TOKEN));
 
         if (user.isWithdraw())
             throw new CustomException(CustomResponseException.WITHDRAW_USER);
@@ -101,7 +101,7 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_TOKEN);
         }
 
-        return (Long) claims.get(IDENTIFIER_KEY);
+        return claims.get(IDENTIFIER_KEY, Long.class);
     }
 
     public Role getRole(String token) {
@@ -114,7 +114,7 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_REFRESH_TOKEN);
         }
 
-        Long userId = (Long) parseClaims(refreshToken).get(IDENTIFIER_KEY);
+        Long userId = parseClaims(refreshToken).get(IDENTIFIER_KEY, Long.class);
 
         if (userRefreshTokenRepository.getValues(userId.toString()) == null) {
             throw new CustomException(CustomResponseException.NOT_REFRESH_TOKEN);
@@ -133,7 +133,7 @@ public class JwtTokenProvider {
             throw new CustomException(CustomResponseException.INVALID_TOKEN);
         }
 
-        Long userId = (Long) claims.get(IDENTIFIER_KEY);
+        Long userId = claims.get(IDENTIFIER_KEY, Long.class);
         UserDetails principal = (UserDetails)getPrincipal(userId);
 
         return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
