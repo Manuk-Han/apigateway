@@ -82,11 +82,11 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(Long userId, Set<Role> roles) {
-        return generateToken(userId, roles, accessTokenExpTime);
+        return PREFIX + generateToken(userId, roles, accessTokenExpTime);
     }
 
     public String generateRefreshToken(Long userId, Set<Role> roles) {
-        String refreshToken = generateToken(userId, roles, refreshTokenExpTime);
+        String refreshToken = PREFIX + generateToken(userId, roles, refreshTokenExpTime);
 
         userRefreshTokenRepository.setValues(userId.toString(), refreshToken);
 
