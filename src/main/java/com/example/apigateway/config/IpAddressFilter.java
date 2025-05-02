@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Set;
 
-@Profile({"class", "submit"})
+@Profile({"course", "submit"})
 @Slf4j
 @Component
 public class IpAddressFilter implements WebFilter {

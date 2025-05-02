@@ -19,7 +19,7 @@ import org.springframework.web.server.WebFilter;
 
 import java.util.Collections;
 
-@Profile({"class", "submit"})
+@Profile({"course", "submit"})
 @Configuration
 @RequiredArgsConstructor
 public class ApiSecurityConfig {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Profile({"class"})
+@Profile({"course"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/result")

@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Profile("class")
+@Profile("course")
 @Slf4j
 @Component
 @RequiredArgsConstructor
