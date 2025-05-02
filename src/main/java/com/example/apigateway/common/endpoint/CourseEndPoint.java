@@ -26,7 +26,7 @@ public enum CourseEndPoint implements EndPoint {
     private static final String PREFIX = "/course";
 
     CourseEndPoint(String path) {
-        this(PREFIX + path, Role.MANAGER);
+        this(path, Role.MANAGER);
     }
 
     CourseEndPoint(String path, Role role) {

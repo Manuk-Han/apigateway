@@ -4,6 +4,7 @@ import com.example.apigateway.common.jwt.JwtAuthenticationWebFilter;
 import com.example.apigateway.common.endpoint.AuthEndPoint;
 import com.example.apigateway.common.endpoint.common.EndPoint;
 import lombok.RequiredArgsConstructor;
+import org.reflections.Reflections;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -17,7 +18,9 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.WebFilter;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Set;
 
 @Profile("default")
 @Configuration
@@ -40,11 +43,14 @@ public class GatewaySecurityConfig {
                 .addFilterBefore(apiKeyFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterBefore(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
-                .authorizeExchange(auth -> applyAllAuth(
-                        auth
-                                .pathMatchers("/webjars/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll(),
-                        AuthEndPoint.values()
-                ).anyExchange().permitAll())
+                .authorizeExchange(auth -> {
+                            auth.pathMatchers("/webjars/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+
+                            applyAllAuth(auth);
+
+                            auth.anyExchange().authenticated();
+                        }
+                )
                 .build();
     }
 
@@ -72,10 +78,18 @@ public class GatewaySecurityConfig {
 
     private static ServerHttpSecurity.AuthorizeExchangeSpec applySingleAuth(ServerHttpSecurity.AuthorizeExchangeSpec auth, EndPoint endPoint) {
         if (endPoint.getRole() == null) return auth.pathMatchers(endPoint.getPath()).permitAll();
-        else return auth.pathMatchers(endPoint.getPath()).hasRole(endPoint.getRole().getRoleName());
+        else return auth.pathMatchers(endPoint.getPath()).hasRole(endPoint.getRole().name());
     }
 
-    public static ServerHttpSecurity.AuthorizeExchangeSpec applyAllAuth(ServerHttpSecurity.AuthorizeExchangeSpec auth, EndPoint[] endPoints) {
+    public static ServerHttpSecurity.AuthorizeExchangeSpec applyAllAuth(ServerHttpSecurity.AuthorizeExchangeSpec auth) {
+        Reflections reflections = new Reflections("com.example.apigateway.common.endpoint");
+        Set<Class<? extends EndPoint>> endpointEnums = reflections.getSubTypesOf(EndPoint.class);
+
+        EndPoint[] endPoints = endpointEnums.stream()
+                .filter(Class::isEnum)
+                .flatMap(cls -> Arrays.stream(cls.getEnumConstants()))
+                .toArray(EndPoint[]::new);
+
         for (EndPoint endPoint : endPoints)
             auth = applySingleAuth(auth, endPoint);
 

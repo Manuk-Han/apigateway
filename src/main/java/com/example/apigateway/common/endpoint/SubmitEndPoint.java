@@ -16,7 +16,7 @@ public enum SubmitEndPoint implements EndPoint {
     private static final String PREFIX = "/submit";
 
     SubmitEndPoint(String path) {
-        this(PREFIX + path, Role.USER);
+        this(path, Role.USER);
     }
 
     SubmitEndPoint(String path, Role role) {

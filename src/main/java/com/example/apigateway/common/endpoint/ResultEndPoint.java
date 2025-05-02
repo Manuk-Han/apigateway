@@ -18,7 +18,7 @@ public enum ResultEndPoint implements EndPoint {
     private static final String PREFIX = "/result";
 
     ResultEndPoint(String path) {
-        this(PREFIX + path, Role.USER);
+        this(path, Role.USER);
     }
 
     ResultEndPoint(String path, Role role) {

@@ -96,7 +96,7 @@ public class JwtAuthenticationWebFilter implements WebFilter {
         if (token == null)
             return null;
 
-        return token.replace("Bearer ", "");
+        return token.replace("Bearer ", "").trim();
     }
 
 }

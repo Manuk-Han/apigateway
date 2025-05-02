@@ -110,6 +110,8 @@ public class JwtTokenProvider {
     }
 
     public String refreshAccessToken(String refreshToken) {
+        refreshToken = refreshToken.replace(PREFIX, "").trim();
+
         if (!validateAccessToken(refreshToken)) {
             throw new CustomException(CustomResponseException.INVALID_REFRESH_TOKEN);
         }
@@ -160,9 +162,13 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Long userId, Set<Role> roles, long expireTime) {
+        Set<String> roleNames = roles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
+
         Claims claims = Jwts.claims()
                 .add(IDENTIFIER_KEY, userId)
-                .add(ROLE, roles)
+                .add(ROLE, roleNames)
                 .build();
 
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));

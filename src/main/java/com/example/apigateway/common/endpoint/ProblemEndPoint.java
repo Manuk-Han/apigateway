@@ -22,7 +22,7 @@ public enum ProblemEndPoint implements EndPoint {
     private static final String PREFIX = "/problem";
 
     ProblemEndPoint(String path) {
-        this(PREFIX + path, Role.USER);
+        this( path, Role.USER);
     }
 
     ProblemEndPoint(String path, Role role) {

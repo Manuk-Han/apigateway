@@ -21,7 +21,7 @@ public enum AuthEndPoint implements EndPoint {
     private static final String PREFIX = "/auth";
 
     AuthEndPoint(String path) {
-        this(PREFIX + path, null);
+        this(path, null);
     }
 
     AuthEndPoint(String path, Role role) {

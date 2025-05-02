@@ -55,6 +55,8 @@ dependencies {
     // Swagger UI
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0'
 
+    implementation 'org.reflections:reflections:0.10.2'
+
 }
 
 dependencyManagement {
