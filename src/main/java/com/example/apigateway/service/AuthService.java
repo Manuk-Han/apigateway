@@ -39,6 +39,9 @@ public class AuthService {
     private String domain;
 
     public void signUp(SignUpForm signUpForm) {
+        if(userRepository.existsByAccountId(signUpForm.getAccountId()))
+            throw new CustomException(CustomResponseException.DUPLICATE_ACCOUNT);
+
         User user = User.builder()
                 .name(signUpForm.getName())
                 .accountId(signUpForm.getAccountId())
