@@ -37,6 +37,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final ProblemBankRepository problemBankRepository;
+    private final ProblemRepository problemRepository;
     private final SubmitRepository submitRepository;
     private final PasswordEncoder passwordEncoder;
     private final ExcelUtil excelUtil;
@@ -156,7 +157,6 @@ public class CourseService {
 
     @Value("${file.sample.path}")
     private String sampleExcelFilePath;
-    private final ProblemRepository problemRepository;
 
     public byte[] getSampleExcel() throws IOException {
         File file = new File(sampleExcelFilePath);

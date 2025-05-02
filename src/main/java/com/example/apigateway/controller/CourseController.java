@@ -76,7 +76,7 @@ public class CourseController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sample.xlsx");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=code_quest_invite_sample.xlsx");
 
         return ResponseEntity.ok()
                 .headers(headers)
