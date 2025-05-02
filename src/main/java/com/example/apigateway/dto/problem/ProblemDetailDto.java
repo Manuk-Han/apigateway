@@ -1,15 +1,12 @@
 package com.example.apigateway.dto.problem;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
 
-
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

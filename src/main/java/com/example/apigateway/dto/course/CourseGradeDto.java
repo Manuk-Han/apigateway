@@ -3,9 +3,10 @@ package com.example.apigateway.dto.course;
 import com.example.apigateway.common.type.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

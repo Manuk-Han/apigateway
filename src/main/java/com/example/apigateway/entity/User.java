@@ -35,6 +35,9 @@ public class User implements UserDetails {
 
     private boolean withdraw;
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Course> courseList;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CourseStudent> courseStudentList;
 

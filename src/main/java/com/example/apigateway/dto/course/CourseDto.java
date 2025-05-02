@@ -2,7 +2,7 @@ package com.example.apigateway.dto.course;
 
 import lombok.*;
 
-
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
