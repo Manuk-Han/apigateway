@@ -28,7 +28,7 @@ public class ValidateUtil {
         if (user.getRole() == Role.ADMIN)
             return course;
 
-        if (!course.getOwner().equals(user))
+        if (!course.getOwner().getAccountId().equals(user.getAccountId()))
             throw new CustomException(CustomResponseException.FORBIDDEN);
 
         return course;
@@ -41,7 +41,7 @@ public class ValidateUtil {
         Course course = courseRepository.findCourseByCourseUUid(courseUUId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_COURSE));
 
-        if (!(courseStudentRepository.existsByCourseAndUser(course, user) || course.getOwner().equals(user)))
+        if (!(courseStudentRepository.existsByCourseAndUser(course, user) || course.getOwner().getAccountId().equals(user.getAccountId())))
             throw new CustomException(CustomResponseException.FORBIDDEN);
 
         return course;
