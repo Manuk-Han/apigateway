@@ -238,7 +238,6 @@ public class CourseService {
         }
     }
 
-
     public Long kickStudent(Long userId, String courseUUid, String studentId) throws IOException {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
@@ -248,6 +247,7 @@ public class CourseService {
         CourseStudent courseStudent = courseStudentRepository.findByCourseAndUser(course, student)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_COURSE_STUDENT));
 
+        student.getCourseStudentList().remove(courseStudent);
         courseStudentRepository.delete(courseStudent);
 
         return course.getCourseId();
