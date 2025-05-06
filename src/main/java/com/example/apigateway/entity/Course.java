@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,7 +34,7 @@ public class Course {
     private User owner;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<CourseStudent> courseStudentList;
+    private List<CourseStudent> courseStudentList = new ArrayList<>();
 
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL)
     private ProblemBank problemBank;

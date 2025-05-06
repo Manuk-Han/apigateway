@@ -115,7 +115,9 @@ public class CourseService {
     public List<StudentInfoDTO> getStudentInfoList(Long userId, String courseUUid) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
-        return course.getCourseStudentList().stream()
+        List<CourseStudent> courseStudentList = courseStudentRepository.findCourseStudentsByCourse(course);
+
+        return courseStudentList.stream()
                 .map(courseStudent -> StudentInfoDTO.builder()
                         .accountId(courseStudent.getUser().getAccountId())
                         .name(courseStudent.getUser().getName())
