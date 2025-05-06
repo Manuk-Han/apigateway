@@ -222,11 +222,19 @@ public class CourseService {
                         .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
             }
 
-            courseStudentRepository.save(CourseStudent.builder()
-                    .course(course)
-                    .user(student)
-                    .inviteType(InviteType.FILE)
-                    .build());
+            if (!courseStudentRepository.existsByCourseAndUser(course, student)) {
+                courseStudentRepository.save(CourseStudent.builder()
+                        .course(course)
+                        .user(student)
+                        .inviteType(InviteType.FILE)
+                        .build());
+            } else {
+                CourseStudent courseStudent = courseStudentRepository.findByCourseAndUser(course, student)
+                        .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+                if (courseStudent.getInviteType() == InviteType.ONE)
+                    courseStudentRepository.save(courseStudent.updateInviteType());
+            }
         }
     }
 

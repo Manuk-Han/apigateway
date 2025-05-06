@@ -27,8 +27,10 @@ public class CourseStudent {
 
     private InviteType inviteType;
 
-    public void updateInviteType() {
+    public CourseStudent updateInviteType() {
         if (inviteType == InviteType.FILE) inviteType = InviteType.ONE;
         else inviteType = InviteType.FILE;
+
+        return this;
     }
 }
