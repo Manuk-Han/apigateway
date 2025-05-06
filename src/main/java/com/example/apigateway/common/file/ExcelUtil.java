@@ -2,12 +2,12 @@ package com.example.apigateway.common.file;
 
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
-import com.example.apigateway.common.type.InviteType;
-import com.example.apigateway.entity.*;
-import com.example.apigateway.repository.CourseStudentRepository;
-import com.example.apigateway.repository.ParticipantRepository;
-import com.example.apigateway.repository.TestCaseRepository;
-import com.example.apigateway.repository.UserRepository;
+import com.example.apigateway.dto.course.InviteStudentDto;
+import com.example.apigateway.entity.Course;
+import com.example.apigateway.entity.Participant;
+import com.example.apigateway.entity.Problem;
+import com.example.apigateway.entity.TestCase;
+import com.example.apigateway.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -26,90 +26,60 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @Profile("course")
 @Component
 @RequiredArgsConstructor
 public class ExcelUtil {
-    private final UserRepository userRepository;
-    private final CourseStudentRepository courseStudentRepository;
     private final ParticipantRepository participantRepository;
     private final TestCaseRepository testCaseRepository;
     private final FileUtil fileUtil;
-    private final PasswordEncoder passwordEncoder;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void addStudentByExcel(Course course, FilePart file) {
-        Mono.fromCallable(() -> {
-                    courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
-                    return File.createTempFile("upload-", file.filename());
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(tempFile ->
-                        file.transferTo(tempFile)
-                                .then(Mono.fromCallable(() -> {
-                                    try (InputStream inputStream = new FileInputStream(tempFile)) {
-                                        Workbook workbook = new XSSFWorkbook(inputStream);
-                                        Sheet sheet = workbook.getSheetAt(0);
+    public Mono<List<InviteStudentDto>> parseExcelToStudents(FilePart file, Course course) {
+        return Mono.fromCallable(() -> {
+            File tempFile = File.createTempFile("upload-", file.filename());
+            file.transferTo(tempFile).block();
 
-                                        for (Row row : sheet) {
-                                            if (row.getRowNum() == 0) continue;
+            try (InputStream inputStream = new FileInputStream(tempFile)) {
+                Workbook workbook = new XSSFWorkbook(inputStream);
+                Sheet sheet = workbook.getSheetAt(0);
 
-                                            String studentId = getCellValue(row.getCell(0));
-                                            User student;
+                List<InviteStudentDto> result = new ArrayList<>();
+                for (Row row : sheet) {
+                    if (row.getRowNum() == 0) continue;
 
-                                            if (userRepository.existsByAccountId(studentId)) {
-                                                student = userRepository.findByAccountId(studentId)
-                                                        .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-                                            } else {
-                                                String name = getCellValue(row.getCell(1));
-                                                String email = getCellValue(row.getCell(2));
-                                                String phone = getCellValue(row.getCell(3));
+                    result.add(InviteStudentDto.builder()
+                            .accountId(getCellValue(row.getCell(0)))
+                            .name(getCellValue(row.getCell(1)))
+                            .email(getCellValue(row.getCell(2)))
+                            .password(getCellValue(row.getCell(3)).substring(getCellValue(row.getCell(3)).length() - 4))
+                            .build());
+                }
+                return result;
+            } finally {
+                tempFile.delete();
+            }
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
 
-                                                student = User.builder()
-                                                        .name(name)
-                                                        .accountId(studentId)
-                                                        .password(passwordEncoder.encode(phone.substring(phone.length() - 4)))
-                                                        .email(email)
-                                                        .withdraw(false)
-                                                        .build();
 
-                                                userRepository.save(student);
-                                            }
-
-                                            courseStudentRepository.save(CourseStudent.builder()
-                                                    .course(course)
-                                                    .user(student)
-                                                    .inviteType(InviteType.FILE)
-                                                    .build());
-                                        }
-
-                                        return tempFile;
-                                    } catch (IOException e) {
-                                        throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
-                                    }
-                                }))
-                )
-                .flatMap(tempFile ->
-                        fileUtil.save(file, "/course/" + course.getCourseId() + "/excel/")
-                                .doOnNext(savedPath -> {
-                                    participantRepository.save(
-                                            Participant.builder()
-                                                    .course(course)
-                                                    .savedFileName(savedPath.substring(savedPath.lastIndexOf("/") + 1))
-                                                    .originalFileName(file.filename())
-                                                    .filePath("/course/" + course.getCourseId() + "/excel/")
-                                                    .build()
-                                    );
-                                    tempFile.delete();
-                                })
-                )
+    public Mono<Void> saveInviteFileRecord(FilePart file, Course course) {
+        return fileUtil.save(file, "/course/" + course.getCourseId() + "/excel/")
+                .doOnNext(savedPath -> participantRepository.save(Participant.builder()
+                        .course(course)
+                        .savedFileName(savedPath.substring(savedPath.lastIndexOf("/") + 1))
+                        .originalFileName(file.filename())
+                        .filePath("/course/" + course.getCourseId() + "/excel/")
+                        .build()))
                 .then();
     }
 
-    public void addTestCaseByExcel(Problem problem, FilePart file) {
-        Mono.fromCallable(() -> File.createTempFile("upload-", file.filename()))
+    public Mono<Void> addTestCaseByExcel(Problem problem, FilePart file) {
+        return Mono.fromCallable(() -> File.createTempFile("upload-", file.filename()))  // ✅ 여기 return 추가
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(tempFile -> file.transferTo(tempFile)
                         .then(Mono.fromRunnable(() -> {
@@ -156,12 +126,18 @@ public class ExcelUtil {
                 );
     }
 
-
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case NUMERIC -> {
+                double d = cell.getNumericCellValue();
+                if (d == Math.floor(d)) {
+                    yield String.format("%.0f", d);
+                } else {
+                    yield String.valueOf(d);
+                }
+            }
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };

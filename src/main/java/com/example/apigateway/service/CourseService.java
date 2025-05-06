@@ -8,9 +8,9 @@ import com.example.apigateway.common.type.Role;
 import com.example.apigateway.common.type.Status;
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
+import com.example.apigateway.dto.course.InviteStudentDto;
 import com.example.apigateway.dto.course.StudentInfoDTO;
 import com.example.apigateway.entity.*;
-import com.example.apigateway.form.course.AddStudentByFileForm;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -22,7 +22,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 @Profile("course")
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CourseService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
@@ -182,13 +185,50 @@ public class CourseService {
         return Files.readAllBytes(file.toPath());
     }
 
-    public Long addStudentsByFile(Long userId, String courseUUid, FilePart filePart) throws IOException {
+    public Mono<Long> addStudentsByFile(Long userId, String courseUUid, FilePart file) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
-        excelUtil.addStudentByExcel(course, filePart);
+//        courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
 
-        return course.getCourseId();
+        return excelUtil.parseExcelToStudents(file, course)
+                .flatMap(studentDtoList -> Mono.fromRunnable(() -> saveStudentsToCourse(course, studentDtoList))
+                        .subscribeOn(Schedulers.boundedElastic()))
+                .then(excelUtil.saveInviteFileRecord(file, course))
+                .thenReturn(course.getCourseId());
     }
+
+    public void saveStudentsToCourse(Course course, List<InviteStudentDto> studentDtoList) {
+        for (InviteStudentDto dto : studentDtoList) {
+            User student;
+
+            if (!userRepository.existsByAccountId(dto.getAccountId())) {
+                student = User.builder()
+                        .name(dto.getName())
+                        .accountId(dto.getAccountId())
+                        .password(passwordEncoder.encode(dto.getPassword()))
+                        .email(dto.getEmail())
+                        .withdraw(false)
+                        .build();
+                userRepository.save(student);
+
+                Role.getRoles(Role.USER).forEach(role ->
+                        userRoleRepository.save(UserRole.builder()
+                                .user(student)
+                                .role(role)
+                                .build()));
+            } else {
+                student = userRepository.findByAccountId(dto.getAccountId())
+                        .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+            }
+
+            courseStudentRepository.save(CourseStudent.builder()
+                    .course(course)
+                    .user(student)
+                    .inviteType(InviteType.FILE)
+                    .build());
+        }
+    }
+
 
     public Long kickStudent(Long userId, String courseUUid, String studentId) throws IOException {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);

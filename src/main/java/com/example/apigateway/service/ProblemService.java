@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Profile("course")
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProblemService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
@@ -66,7 +68,7 @@ public class ProblemService {
                         .build())
                 .toList());
 
-        excelUtil.addTestCaseByExcel(problem, testCaseFile);
+        excelUtil.addTestCaseByExcel(problem, testCaseFile).subscribe();
 
         problemRepository.save(problem);
 
@@ -102,7 +104,7 @@ public class ProblemService {
                 .toList());
 
         if(testCaseFile != null)
-            excelUtil.addTestCaseByExcel(problem, testCaseFile);
+            excelUtil.addTestCaseByExcel(problem, testCaseFile).subscribe();
 
         problemRepository.save(problem);
 

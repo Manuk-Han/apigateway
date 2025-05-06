@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,8 +87,13 @@ public class CourseController {
     }
 
     @PostMapping("/invite-file/{courseUUId}")
-    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, @RequestPart("file") FilePart file) throws IOException {
-        return ResponseEntity.ok(courseService.addStudentsByFile(userId, courseUUId, file));
+    public Mono<ResponseEntity<Long>> inviteAll(
+            @RequestHeader("X-USER-ID") Long userId,
+            @PathVariable String courseUUId,
+            @RequestPart("file") FilePart file) {
+
+        return courseService.addStudentsByFile(userId, courseUUId, file)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping("/kick/{courseUUId}")
