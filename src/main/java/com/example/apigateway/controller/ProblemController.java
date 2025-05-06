@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,15 +37,15 @@ public class ProblemController {
     }
 
     @PostMapping("/create/{courseUUId}")
-    public ResponseEntity<Long> createProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemCreateForm problemCreateForm, @RequestPart("file") FilePart file) throws IOException {
-        return ResponseEntity.ok()
-                .body(problemService.createProblem(userId, courseUUId, problemCreateForm, file));
+    public Mono<ResponseEntity<Long>> createProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemCreateForm problemCreateForm, @RequestPart("file") FilePart file) throws IOException {
+        return problemService.createProblem(userId, courseUUId, problemCreateForm, file)
+                .map(ResponseEntity::ok);
     }
 
     @PostMapping("/update/{courseUUId}")
-    public ResponseEntity<Long> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, @RequestPart("file") FilePart file) throws IOException {
-        return ResponseEntity.ok()
-                .body(problemService.updateProblem(userId, courseUUId, problemUpdateForm, file));
+    public Mono<ResponseEntity<Long>> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, @RequestPart("file") FilePart file) throws IOException {
+        return problemService.updateProblem(userId, courseUUId, problemUpdateForm, file)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping("/delete/{courseUUId}")

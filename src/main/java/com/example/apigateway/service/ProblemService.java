@@ -17,6 +17,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,9 +37,8 @@ public class ProblemService {
     private final ExcelUtil excelUtil;
     private final ValidateUtil validateUtil;
 
-    public Long createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, FilePart testCaseFile) throws IOException {
+    public Mono<Long> createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, FilePart testCaseFile) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUId);
-
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
 
         Problem problem = Problem.builder()
@@ -49,68 +49,69 @@ public class ProblemService {
                 .endDate(problemCreateForm.getEndDate())
                 .problemBank(problemBank)
                 .build();
+
         problemRepository.save(problem);
 
         restrictionRepository.saveAll(problemCreateForm.getProblemRestriction()
                 .stream()
-                .map(restriction -> Restriction.builder()
-                        .restrictionDescription(restriction)
+                .map(r -> Restriction.builder()
+                        .restrictionDescription(r)
                         .problem(problem)
                         .build())
                 .toList());
 
         exampleRepository.saveAll(problemCreateForm.getExampleList()
                 .stream()
-                .map(example -> Example.builder()
-                        .inputExample(example.getInputExample())
-                        .outputExample(example.getInputExample())
+                .map(ex -> Example.builder()
+                        .inputExample(ex.getInputExample())
+                        .outputExample(ex.getOutputExample())
                         .problem(problem)
                         .build())
                 .toList());
 
-        excelUtil.addTestCaseByExcel(problem, testCaseFile).subscribe();
-
-        problemRepository.save(problem);
-
-        return problem.getProblemId();
+        return excelUtil.addTestCaseByExcel(problem, testCaseFile)
+                .thenReturn(problem.getProblemId());
     }
 
-    public Long updateProblem(Long userId, String courseUUId, ProblemUpdateForm problemUpdateForm, FilePart testCaseFile) throws IOException {
+
+    public Mono<Long> updateProblem(Long userId, String courseUUId, ProblemUpdateForm form, FilePart testCaseFile) {
         validateUtil.validateCourseOwner(userId, courseUUId);
 
-        Problem problem = problemRepository.findById(problemUpdateForm.getProblemId())
+        Problem problem = problemRepository.findById(form.getProblemId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
 
         restrictionRepository.deleteRestrictionsByProblem(problem);
         exampleRepository.deleteExamplesByProblem(problem);
 
-        problemRepository.save(problem.updateProblem(problemUpdateForm));
+        problemRepository.save(problem.updateProblem(form));
 
-        restrictionRepository.saveAll(problemUpdateForm.getProblemRestriction()
+        restrictionRepository.saveAll(form.getProblemRestriction()
                 .stream()
-                .map(restriction -> Restriction.builder()
-                        .restrictionDescription(restriction)
+                .map(desc -> Restriction.builder()
+                        .restrictionDescription(desc)
                         .problem(problem)
                         .build())
                 .toList());
 
-        exampleRepository.saveAll(problemUpdateForm.getExampleList()
+        exampleRepository.saveAll(form.getExampleList()
                 .stream()
-                .map(example -> Example.builder()
-                        .inputExample(example.getInputExample())
-                        .outputExample(example.getInputExample())
+                .map(ex -> Example.builder()
+                        .inputExample(ex.getInputExample())
+                        .outputExample(ex.getOutputExample())
                         .problem(problem)
                         .build())
                 .toList());
 
-        if(testCaseFile != null)
-            excelUtil.addTestCaseByExcel(problem, testCaseFile).subscribe();
+        Mono<Void> testCaseSaveMono = Mono.empty();
 
-        problemRepository.save(problem);
+        if (testCaseFile != null) {
+            testCaseSaveMono = excelUtil.addTestCaseByExcel(problem, testCaseFile);
+        }
 
-        return problem.getProblemId();
+        return testCaseSaveMono.thenReturn(problem.getProblemId());
     }
-    
+
+
     public void deleteProblem(Long userId, String courseUUId, Long problemId) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
