@@ -16,10 +16,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,107 +40,122 @@ public class ExcelUtil {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void addStudentByExcel(Course course, MultipartFile file) throws IOException {
-        try {
-            courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
+    public void addStudentByExcel(Course course, FilePart file) {
+        Mono.fromCallable(() -> {
+                    courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
+                    return File.createTempFile("upload-", file.filename());
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(tempFile ->
+                        file.transferTo(tempFile)
+                                .then(Mono.fromCallable(() -> {
+                                    try (InputStream inputStream = new FileInputStream(tempFile)) {
+                                        Workbook workbook = new XSSFWorkbook(inputStream);
+                                        Sheet sheet = workbook.getSheetAt(0);
 
-            InputStream inputStream = file.getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream);
+                                        for (Row row : sheet) {
+                                            if (row.getRowNum() == 0) continue;
 
-            Sheet sheet = workbook.getSheetAt(0);
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
+                                            String studentId = getCellValue(row.getCell(0));
+                                            User student;
 
-                String studentId = getCellValue(row.getCell(0));
+                                            if (userRepository.existsByAccountId(studentId)) {
+                                                student = userRepository.findByAccountId(studentId)
+                                                        .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+                                            } else {
+                                                String name = getCellValue(row.getCell(1));
+                                                String email = getCellValue(row.getCell(2));
+                                                String phone = getCellValue(row.getCell(3));
 
-                User student;
-                if (userRepository.existsByAccountId(studentId)) {
-                    student = userRepository.findByAccountId(studentId)
-                            .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
-                } else {
-                    String name = getCellValue(row.getCell(1));
-                    String email = getCellValue(row.getCell(2));
-                    String phone = getCellValue(row.getCell(3));
+                                                student = User.builder()
+                                                        .name(name)
+                                                        .accountId(studentId)
+                                                        .password(passwordEncoder.encode(phone.substring(phone.length() - 4)))
+                                                        .email(email)
+                                                        .withdraw(false)
+                                                        .build();
 
-                    student = User.builder()
-                            .name(name)
-                            .accountId(studentId)
-                            .password(passwordEncoder.encode(phone.substring(phone.length() - 4)))
-                            .email(email)
-                            .withdraw(false)
-                            .build();
+                                                userRepository.save(student);
+                                            }
 
-                    userRepository.save(student);
-                }
+                                            courseStudentRepository.save(CourseStudent.builder()
+                                                    .course(course)
+                                                    .user(student)
+                                                    .inviteType(InviteType.FILE)
+                                                    .build());
+                                        }
 
-                courseStudentRepository.save(
-                        CourseStudent.builder()
-                                .course(course)
-                                .user(student)
-                                .inviteType(InviteType.FILE)
-                                .build()
-                );
-            }
-        } catch (IOException e) {
-            throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
-        } finally {
-            String savedFileName = fileUtil.save(file, "/course/" + course.getCourseId() + "/excel/");
-
-            participantRepository.save(
-                    Participant.builder()
-                            .course(course)
-                            .savedFileName(savedFileName)
-                            .originalFileName(file.getOriginalFilename())
-                            .filePath("/course/" + course.getCourseId() + "/excel/")
-                            .build()
-            );
-        }
+                                        return tempFile;
+                                    } catch (IOException e) {
+                                        throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
+                                    }
+                                }))
+                )
+                .flatMap(tempFile ->
+                        fileUtil.save(file, "/course/" + course.getCourseId() + "/excel/")
+                                .doOnNext(savedPath -> {
+                                    participantRepository.save(
+                                            Participant.builder()
+                                                    .course(course)
+                                                    .savedFileName(savedPath.substring(savedPath.lastIndexOf("/") + 1))
+                                                    .originalFileName(file.filename())
+                                                    .filePath("/course/" + course.getCourseId() + "/excel/")
+                                                    .build()
+                                    );
+                                    tempFile.delete();
+                                })
+                )
+                .then();
     }
 
-    public void addTestCaseByExcel(Problem problem, MultipartFile file) throws IOException {
-        try {
-            testCaseRepository.deleteTestCasesByProblem(problem);
+    public void addTestCaseByExcel(Problem problem, FilePart file) {
+        Mono.fromCallable(() -> File.createTempFile("upload-", file.filename()))
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(tempFile -> file.transferTo(tempFile)
+                        .then(Mono.fromRunnable(() -> {
+                            try (InputStream inputStream = new FileInputStream(tempFile)) {
+                                Workbook workbook = new XSSFWorkbook(inputStream);
+                                Sheet sheet = workbook.getSheetAt(0);
 
-            InputStream inputStream = file.getInputStream();
-            Workbook workbook = new XSSFWorkbook(inputStream);
+                                int num = 1;
+                                for (Row row : sheet) {
+                                    if (row.getRowNum() == 0) continue;
 
-            Sheet sheet = workbook.getSheetAt(0);
+                                    String input = getCellValue(row.getCell(0));
+                                    String output = getCellValue(row.getCell(1));
 
-            int num = 1;
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;
+                                    if (input.isEmpty() || output.isEmpty()) {
+                                        throw new CustomException(CustomResponseException.INVALID_TESTCASE);
+                                    }
 
-                String input = getCellValue(row.getCell(0));
-                String output = getCellValue(row.getCell(1));
-
-                if (input.isEmpty() || output.isEmpty()) {
-                    throw new CustomException(CustomResponseException.INVALID_TESTCASE);
-                }
-
-                applicationEventPublisher.publishEvent(
-                        TestcaseFileSaveEvent.builder()
-                                .inputContent(input)
-                                .outputContent(output)
-                                .problemId(problem.getProblemId())
-                                .num(num)
-                                .build()
+                                    applicationEventPublisher.publishEvent(
+                                            TestcaseFileSaveEvent.builder()
+                                                    .inputContent(input)
+                                                    .outputContent(output)
+                                                    .problemId(problem.getProblemId())
+                                                    .num(num++)
+                                                    .build()
+                                    );
+                                }
+                            } catch (IOException e) {
+                                throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
+                            } finally {
+                                tempFile.delete();
+                            }
+                        }))
+                        .then(fileUtil.save(file, "/problem/" + problem.getProblemId() + "/excel/"))
+                        .doOnNext(savedPath -> {
+                            testCaseRepository.save(TestCase.builder()
+                                    .problem(problem)
+                                    .savedFileName(savedPath.substring(savedPath.lastIndexOf("/") + 1))
+                                    .originalFileName(file.filename())
+                                    .filePath("/problem/" + problem.getProblemId() + "/excel/")
+                                    .build());
+                        })
+                        .then()
                 );
-            }
-        } catch (IOException e) {
-            throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
-        } finally {
-            String savedFileName = fileUtil.save(file, "/problem/" + problem.getProblemId() + "/excel/");
-
-            testCaseRepository.save(
-                    TestCase.builder()
-                            .problem(problem)
-                            .savedFileName(savedFileName)
-                            .originalFileName(file.getOriginalFilename())
-                            .filePath("/problem/" + problem.getProblemId() + "/excel/")
-                            .build()
-            );
-        }
     }
+
 
     private String getCellValue(Cell cell) {
         if (cell == null) return "";

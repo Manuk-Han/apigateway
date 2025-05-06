@@ -8,6 +8,7 @@ import com.example.apigateway.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,13 +36,13 @@ public class ProblemController {
     }
 
     @PostMapping("/create/{courseUUId}")
-    public ResponseEntity<Long> createProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemCreateForm problemCreateForm, MultipartFile file) throws IOException {
+    public ResponseEntity<Long> createProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemCreateForm problemCreateForm, @RequestPart("file") FilePart file) throws IOException {
         return ResponseEntity.ok()
                 .body(problemService.createProblem(userId, courseUUId, problemCreateForm, file));
     }
 
     @PostMapping("/update/{courseUUId}")
-    public ResponseEntity<Long> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, MultipartFile file) throws IOException {
+    public ResponseEntity<Long> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, @RequestPart("file") FilePart file) throws IOException {
         return ResponseEntity.ok()
                 .body(problemService.updateProblem(userId, courseUUId, problemUpdateForm, file));
     }

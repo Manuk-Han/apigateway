@@ -13,6 +13,7 @@ import com.example.apigateway.repository.*;
 import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +34,7 @@ public class ProblemService {
     private final ExcelUtil excelUtil;
     private final ValidateUtil validateUtil;
 
-    public Long createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, MultipartFile testCaseFile) throws IOException {
+    public Long createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, FilePart testCaseFile) throws IOException {
         Course course = validateUtil.validateCourseOwner(userId, courseUUId);
 
         ProblemBank problemBank = problemBankRepository.findByCourse(course);
@@ -72,7 +73,7 @@ public class ProblemService {
         return problem.getProblemId();
     }
 
-    public Long updateProblem(Long userId, String courseUUId, ProblemUpdateForm problemUpdateForm, MultipartFile testCaseFile) throws IOException {
+    public Long updateProblem(Long userId, String courseUUId, ProblemUpdateForm problemUpdateForm, FilePart testCaseFile) throws IOException {
         validateUtil.validateCourseOwner(userId, courseUUId);
 
         Problem problem = problemRepository.findById(problemUpdateForm.getProblemId())

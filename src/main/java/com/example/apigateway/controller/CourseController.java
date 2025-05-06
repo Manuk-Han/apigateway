@@ -3,6 +3,7 @@ package com.example.apigateway.controller;
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
 import com.example.apigateway.dto.course.StudentInfoDTO;
+import com.example.apigateway.form.course.AddStudentByFileForm;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -84,7 +86,7 @@ public class CourseController {
     }
 
     @PostMapping("/invite-file/{courseUUId}")
-    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, MultipartFile file) throws IOException {
+    public ResponseEntity<Long> inviteAll(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, @RequestPart("file") FilePart file) throws IOException {
         return ResponseEntity.ok(courseService.addStudentsByFile(userId, courseUUId, file));
     }
 

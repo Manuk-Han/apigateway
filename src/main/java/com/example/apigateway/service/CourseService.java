@@ -4,11 +4,13 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.type.InviteType;
+import com.example.apigateway.common.type.Role;
 import com.example.apigateway.common.type.Status;
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
 import com.example.apigateway.dto.course.StudentInfoDTO;
 import com.example.apigateway.entity.*;
+import com.example.apigateway.form.course.AddStudentByFileForm;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
 import com.example.apigateway.form.course.CourseUpdateForm;
@@ -17,6 +19,7 @@ import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +39,7 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final UserRoleRepository userRoleRepository;
     private final ProblemBankRepository problemBankRepository;
     private final ProblemRepository problemRepository;
     private final SubmitRepository submitRepository;
@@ -144,6 +148,14 @@ public class CourseService {
                     .build();
 
             userRepository.save(student);
+
+            Role.getRoles(Role.USER)
+                    .forEach(role -> userRoleRepository.save(
+                            UserRole.builder()
+                                    .user(student)
+                                    .role(role)
+                                    .build()
+                    ));
         }
 
         courseStudentRepository.save(
@@ -170,10 +182,10 @@ public class CourseService {
         return Files.readAllBytes(file.toPath());
     }
 
-    public Long addStudentsByFile(Long userId, String courseUUid, MultipartFile file) throws IOException {
+    public Long addStudentsByFile(Long userId, String courseUUid, FilePart filePart) throws IOException {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
-        excelUtil.addStudentByExcel(course, file);
+        excelUtil.addStudentByExcel(course, filePart);
 
         return course.getCourseId();
     }
