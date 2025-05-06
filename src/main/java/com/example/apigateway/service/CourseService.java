@@ -252,7 +252,7 @@ public class CourseService {
         User student = userRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
 
-        if (courseStudentRepository.existsByCourseAndUser(course, student))
+        if (!courseStudentRepository.existsByCourseAndUser(course, student))
             throw new CustomException(CustomResponseException.NOT_COURSE_STUDENT);
 
         return StudentInfoDTO.builder()
