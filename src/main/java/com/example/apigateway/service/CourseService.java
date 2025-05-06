@@ -129,6 +129,7 @@ public class CourseService {
                         .accountId(courseStudent.getUser().getAccountId())
                         .name(courseStudent.getUser().getName())
                         .email(courseStudent.getUser().getEmail())
+                        .inviteType(courseStudent.getInviteType())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -311,6 +312,7 @@ public class CourseService {
                 .accountId(student.getAccountId())
                 .name(student.getName())
                 .email(student.getEmail())
+                .inviteType(courseStudentRepository.findByCourseAndUser(course, student).get().getInviteType())
                 .build();
     }
 
