@@ -191,7 +191,7 @@ public class CourseService {
 
 //        courseStudentRepository.deleteCourseStudentsByCourseAndInviteType(course, InviteType.FILE);
 
-        return excelUtil.parseExcelToStudents(file, course)
+        return excelUtil.addStudents(file, course)
                 .flatMap(studentDtoList -> Mono.fromRunnable(() -> saveStudentsToCourse(course, studentDtoList))
                         .subscribeOn(Schedulers.boundedElastic()))
                 .then(excelUtil.saveInviteFileRecord(file, course))

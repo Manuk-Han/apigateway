@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class ExcelUtil {
     private final ParticipantRepository participantRepository;
     private final FileUtil fileUtil;
 
-    public Mono<List<InviteStudentDto>> parseExcelToStudents(FilePart file, Course course) {
+    public Mono<List<InviteStudentDto>> addStudents(FilePart file, Course course) {
         return Mono.fromCallable(() -> {
             File tempFile = File.createTempFile("upload-", file.filename());
             file.transferTo(tempFile).block();
@@ -70,7 +71,7 @@ public class ExcelUtil {
                 .then();
     }
 
-    public Mono<List<TestCaseDto>> parseExcelToTestcases(FilePart file, Problem problem) {
+    public Mono<List<TestCaseDto>> addTestcases(FilePart file) {
         return Mono.fromCallable(() -> {
             File tempFile = File.createTempFile("upload-", file.filename());
             file.transferTo(tempFile).block();
@@ -95,6 +96,17 @@ public class ExcelUtil {
                 tempFile.delete();
             }
         }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Value("${file.save.testcase.path}")
+    private String PATH_PREFIX;
+
+    public Mono<List<TestCaseDto>> updateTestCases(FilePart file, Problem problem) {
+        String testcaseFilePath = PATH_PREFIX + "/problem/" + problem.getProblemId() + "/testcase";
+
+        fileUtil.deleteOldTestcaseFiles(testcaseFilePath);
+
+        return addTestcases(file);
     }
 
     private String getCellValue(Cell cell) {

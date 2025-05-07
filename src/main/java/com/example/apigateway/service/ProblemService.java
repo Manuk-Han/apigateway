@@ -7,28 +7,25 @@ import com.example.apigateway.common.file.TestcaseFileSaveEvent;
 import com.example.apigateway.dto.problem.ExampleDto;
 import com.example.apigateway.dto.problem.ProblemDetailDto;
 import com.example.apigateway.dto.problem.ProblemDto;
-import com.example.apigateway.dto.problem.TestCaseDto;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
 import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.repository.*;
 import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,7 +92,7 @@ public class ProblemService {
                 .toList());
 
         if (testCaseFile != null) {
-            return excelUtil.parseExcelToTestcases(testCaseFile, problem)
+            return excelUtil.addTestcases(testCaseFile)
                     .flatMap(testCaseDtoList -> Mono.fromRunnable(() -> {
                         List<TestcaseFileSaveEvent> eventList = testCaseDtoList.stream()
                                 .map(testcase -> TestcaseFileSaveEvent.builder()
@@ -148,14 +145,25 @@ public class ProblemService {
                         .build())
                 .toList());
 
-        Mono<Void> testCaseSaveMono = Mono.empty();
-//        if (testCaseFile != null) {
-//            testCaseSaveMono = excelUtil.addTestCaseByExcel(problem, testCaseFile)
-//                    .doOnNext(events -> events.forEach(applicationEventPublisher::publishEvent))
-//                    .then();
-//        }
+        if (testCaseFile != null) {
+            return excelUtil.updateTestCases(testCaseFile, problem)
+                    .flatMap(testCaseDtoList -> Mono.fromRunnable(() -> {
+                        List<TestcaseFileSaveEvent> eventList = testCaseDtoList.stream()
+                                .map(testcase -> TestcaseFileSaveEvent.builder()
+                                        .problemId(problem.getProblemId())
+                                        .inputContent(testcase.getInput())
+                                        .outputContent(testcase.getOutput())
+                                        .num(testcase.getNum())
+                                        .build())
+                                .toList();
 
-        return testCaseSaveMono.thenReturn(problem.getProblemId());
+                        createProblemTestCase(eventList, problem.getProblemId()); // ✅ 이벤트 발행
+                    }))
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .thenReturn(problem.getProblemId());
+        }
+
+        return Mono.just(problem.getProblemId());
     }
 
     public void deleteProblem(Long userId, String courseUUId, Long problemId) {

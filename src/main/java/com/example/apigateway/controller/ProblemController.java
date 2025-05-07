@@ -58,7 +58,7 @@ public class ProblemController {
     }
 
     @PostMapping("/update/{courseUUId}")
-    public Mono<ResponseEntity<Long>> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, @RequestPart("file") FilePart file) throws IOException {
+    public Mono<ResponseEntity<Long>> updateProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, ProblemUpdateForm problemUpdateForm, @RequestPart(name = "file", required = false) FilePart file) throws IOException {
         return problemService.updateProblem(userId, courseUUId, problemUpdateForm, file)
                 .map(ResponseEntity::ok);
     }

@@ -1,15 +1,21 @@
 package com.example.apigateway.common.file;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class FileUtil {
     public Mono<String> save(FilePart file, String filePath) {
@@ -61,4 +67,18 @@ public class FileUtil {
         return path + "/" + fileName;
     }
 
+    public void deleteOldTestcaseFiles(String path) {
+        Path dir = Paths.get(path);
+
+        try {
+            if (Files.exists(dir)) {
+                Files.walk(dir)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+        } catch (IOException e) {
+            log.error("기존 테스트케이스 파일 삭제 실패: {}", e.getMessage());
+        }
+    }
 }
