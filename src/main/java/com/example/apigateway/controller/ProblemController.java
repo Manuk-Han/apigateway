@@ -7,6 +7,8 @@ import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,19 @@ public class ProblemController {
     public ResponseEntity<ProblemDetailDto> getProblemDetail(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) {
         return ResponseEntity.ok()
                 .body(problemService.getProblemDetail(userId, courseUUId, problemId));
+    }
+
+    @GetMapping("/invite/sample/download")
+    public ResponseEntity<?> downloadSample(@RequestHeader("X-USER-ID") Long userId) throws IOException {
+        byte[] fileContent = problemService.getSampleExcel();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=code_quest_invite_sample.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileContent);
     }
 
     @PostMapping("/create/{courseUUId}")

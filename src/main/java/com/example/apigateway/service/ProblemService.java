@@ -12,14 +12,16 @@ import com.example.apigateway.form.problem.ProblemUpdateForm;
 import com.example.apigateway.repository.*;
 import com.example.apigateway.service.common.ValidateUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,19 @@ public class ProblemService {
     private final ProblemRepository problemRepository;
     private final ExcelUtil excelUtil;
     private final ValidateUtil validateUtil;
+
+    @Value("${file.testcase.path}")
+    private String sampleExcelFilePath;
+
+    public byte[] getSampleExcel() throws IOException {
+        File file = new File(sampleExcelFilePath);
+
+        if (!file.exists()) {
+            throw new CustomException(CustomResponseException.FILE_NOT_FOUND);
+        }
+
+        return Files.readAllBytes(file.toPath());
+    }
 
     public Mono<Long> createProblem(Long userId, String courseUUId, ProblemCreateForm problemCreateForm, FilePart testCaseFile) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUId);
