@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Language {
     C("c", ".c"),
-    CPP("c++", ".cpp"),
+    CPP("cpp", ".cpp"),
     JAVA("java", ".java"),
     PYTHON("python", ".py");
 

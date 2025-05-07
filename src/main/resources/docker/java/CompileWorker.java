@@ -107,7 +107,7 @@ public class CompileWorker {
         int score = numCases == 0 ? 0 : totalScore / numCases;
         double avgExecutionTime = numCases == 0 ? 0.0 : totalTime / numCases;
 
-        sendResultToServer(submissionId, userId, language, score, Status.PASS, "", avgExecutionTime, resultEndpoint);
+        sendResultToServer(submissionId, userId, language, score, score == 100 ? Status.CORRECT : Status.WRONG, "", avgExecutionTime, resultEndpoint);
 
         String doneJson = String.format("{\"submitId\":\"%s\",\"problemId\":\"%s\",\"userId\":\"%s\",\"language\":\"%s\"}",
                 submissionId, problemId, userId, language);

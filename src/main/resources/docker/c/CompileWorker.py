@@ -88,10 +88,12 @@ def process_submission(data):
         score = total_score // case_count if case_count > 0 else 0
         avg_time = total_time / case_count if case_count > 0 else 0.0
 
+        status = "CORRECT" if score == 100 else "WRONG"
+
         post_result({
             "submitId": submit_id,
             "score": score,
-            "status": "PASS",
+            "status": status,
             "executionTime": round(avg_time, 3),
             "errorDetail": ""
         })

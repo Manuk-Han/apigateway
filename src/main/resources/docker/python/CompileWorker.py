@@ -97,7 +97,9 @@ def handle_submission(data):
     avg_time = total_time / num_cases if num_cases > 0 else 0.0
     score = total_score // num_cases if num_cases > 0 else 0
 
-    send_result(submit_id, user_id, language, score, "PASS", "", avg_time)
+    status = "CORRECT" if score == 100 else "WRONG"
+
+    send_result(submit_id, user_id, language, score, status, "", avg_time)
 
     done_msg = {
         "submitId": submit_id,
