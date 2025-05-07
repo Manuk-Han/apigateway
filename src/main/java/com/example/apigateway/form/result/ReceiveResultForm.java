@@ -8,11 +8,11 @@ import lombok.Getter;
 @Data
 @Getter
 public class ReceiveResultForm {
-    private Long submissionId;
+    private Long submitId;
 
     private int score;
 
-    private Status status;
+    private String status;
 
     private double executionTime;
 

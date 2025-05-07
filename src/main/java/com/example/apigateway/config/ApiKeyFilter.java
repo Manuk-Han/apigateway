@@ -18,7 +18,7 @@ public class ApiKeyFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().toString();
-        if (!path.startsWith("/result")) {
+        if (!path.startsWith("/submit/result")) {
             return chain.filter(exchange);
         }
 

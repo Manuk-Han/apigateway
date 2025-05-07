@@ -2,6 +2,7 @@ import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.commons.text.StringEscapeUtils; // ★ escape 처리
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,7 +14,7 @@ import java.util.*;
 public class CompileWorker {
     public static void main(String[] args) throws Exception {
         String kafkaServer = System.getenv().getOrDefault("KAFKA_SERVERS", "http://host.docker.internal:9092");
-        String resultEndpoint = System.getenv().getOrDefault("RESULT_ENDPOINT", "http://host.docker.internal:8082/result");
+        String resultEndpoint = System.getenv().getOrDefault("RESULT_ENDPOINT", "http://host.docker.internal:8082/submit/result");
 
         Properties consumerProps = new Properties();
         consumerProps.put("bootstrap.servers", kafkaServer);
@@ -51,8 +52,10 @@ public class CompileWorker {
 
         Path workDir = Paths.get("/app/workdir/" + submissionId);
         Files.createDirectories(workDir);
+
         Path codeFile = workDir.resolve("Main.java");
-        Files.writeString(codeFile, code);
+        String formattedCode = StringEscapeUtils.unescapeJava(code); // ★ escape 해제
+        Files.writeString(codeFile, formattedCode);
 
         Process compile = new ProcessBuilder("javac", codeFile.toString())
                 .directory(workDir.toFile())
@@ -62,7 +65,7 @@ public class CompileWorker {
 
         if (compile.exitValue() != 0) {
             String error = new String(compile.getInputStream().readAllBytes());
-            sendResultToServer(submissionId, userId, language, 0, "COMPILE_ERROR", error, resultEndpoint);
+            sendResultToServer(submissionId, userId, language, 0, Status.ERROR, error, resultEndpoint);
             return;
         }
 
@@ -92,7 +95,7 @@ public class CompileWorker {
         }
 
         int score = numCases == 0 ? 0 : totalScore / numCases;
-        sendResultToServer(submissionId, userId, language, score, "SUCCESS", "", resultEndpoint);
+        sendResultToServer(submissionId, userId, language, score, Status.PASS, "", resultEndpoint);
 
         String doneJson = String.format("{\"submitId\":\"%s\",\"problemId\":\"%s\",\"userId\":\"%s\",\"language\":\"%s\"}",
                 submissionId, problemId, userId, language);
@@ -100,12 +103,12 @@ public class CompileWorker {
         System.out.println("[COMPILE + TESTCASE SUCCESS] sent to topic compile-done");
     }
 
-    private static void sendResultToServer(String submitId, String userId, String language, int score, String status, String error, String endpoint) throws Exception {
+    private static void sendResultToServer(String submitId, String userId, String language, int score, Status status, String error, String endpoint) throws Exception {
         String apiKey = System.getenv().getOrDefault("RESULT_API_KEY", "WORKER-KEY");
 
         String body = String.format(
                 "{" +
-                        "\"submissionId\":\"%s\"," +
+                        "\"submitId\":%s," +
                         "\"score\":%d," +
                         "\"status\":\"%s\"," +
                         "\"executionTime\":0.0," +
@@ -113,6 +116,8 @@ public class CompileWorker {
                         "}",
                 submitId, score, status, error.replace("\"", "'")
         );
+
+        System.out.println("\n-------------------" + body + "\n-------------------\n");
 
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -138,4 +143,13 @@ public class CompileWorker {
         }
         return "";
     }
+}
+
+enum Status {
+    CORRECT,
+    WRONG,
+    REJECTED,
+    PASS,
+    ERROR,
+    NOT_SUBMITTED
 }

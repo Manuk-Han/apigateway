@@ -4,6 +4,7 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.kafka.KafkaSubmitForm;
 import com.example.apigateway.common.type.Language;
+import com.example.apigateway.common.type.Status;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.result.ReceiveResultForm;
 import com.example.apigateway.form.submit.SubmitForm;
@@ -68,13 +69,13 @@ public class SubmitService {
 
     public void receiveSubmitResult(ReceiveResultForm resultForm) {
         try {
-            Submit submit = submitRepository.findById(resultForm.getSubmissionId())
+            Submit submit = submitRepository.findById(resultForm.getSubmitId())
                     .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
 
             Result result = Result.builder()
                     .submit(submit)
                     .score(resultForm.getScore())
-                    .status(resultForm.getStatus())
+                    .status(Status.fromString(resultForm.getStatus()))
                     .executionTime(resultForm.getExecutionTime())
                     .errorDetail(resultForm.getErrorDetail())
                     .build();

@@ -27,7 +27,7 @@ public class SubmitController {
     }
 
     @PostMapping("/result")
-    public ResponseEntity<String> getResult(ReceiveResultForm receiveResultForm) {
+    public ResponseEntity<String> getResult(@RequestBody ReceiveResultForm receiveResultForm) {
         submitService.receiveSubmitResult(receiveResultForm);
 
         return ResponseEntity.ok()
