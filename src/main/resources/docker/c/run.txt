@@ -1,0 +1,7 @@
+docker run -it \
+  -e KAFKA_SERVERS=kafka:29092 \
+  -e RESULT_ENDPOINT=http://host.docker.internal:8082/submit/result \
+  -v /Users/manuk/Desktop/file/testcase/problem:/app/testcases \
+  -v /Users/manuk/Desktop/file/workdir:/app/workdir \
+  --network codequest-network \
+  compile_worker-c

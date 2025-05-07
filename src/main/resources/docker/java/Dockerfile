@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y curl unzip && \
     mv kafka-clients.jar slf4j-api.jar slf4j-simple.jar commons-text.jar commons-lang3.jar libs/ && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY ./CompileWorker.java /app/CompileWorker.java
+COPY CompileWorker.java /app/CompileWorker.java
 
 RUN javac -cp ".:/app/libs/*" CompileWorker.java
 
