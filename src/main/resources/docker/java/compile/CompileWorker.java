@@ -117,6 +117,7 @@ public class CompileWorker {
 
     private static void sendResultToServer(String submitId, String userId, String language, int score, Status status, String error, double executionTime, String endpoint) throws Exception {
         String apiKey = System.getenv().getOrDefault("RESULT_API_KEY", "WORKER-KEY");
+        String safeError = StringEscapeUtils.escapeJson(error);
 
         String body = String.format(
                 "{" +
@@ -126,7 +127,7 @@ public class CompileWorker {
                         "\"executionTime\":%.3f," +
                         "\"errorDetail\":\"%s\"" +
                         "}",
-                submitId, score, status, executionTime, error.replace("\"", "'")
+                submitId, score, status, executionTime, safeError
         );
 
         URL url = new URL(endpoint);
@@ -143,6 +144,15 @@ public class CompileWorker {
 
         int code = con.getResponseCode();
         System.out.println("[RESULT POST] Response Code: " + code);
+
+        if (code >= 400) {
+            try (InputStream err = con.getErrorStream()) {
+                if (err != null) {
+                    String response = new String(err.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    System.err.println("[SERVER ERROR RESPONSE] " + response);
+                }
+            }
+        }
     }
 
     private static String extractJson(String json, String key) {
