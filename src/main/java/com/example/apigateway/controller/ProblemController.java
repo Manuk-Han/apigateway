@@ -38,7 +38,7 @@ public class ProblemController {
                 .body(problemService.getProblemDetail(userId, courseUUId, problemId));
     }
 
-    @GetMapping("/invite/sample/download")
+    @GetMapping("/testcase/sample/download")
     public ResponseEntity<?> downloadSample(@RequestHeader("X-USER-ID") Long userId) throws IOException {
         byte[] fileContent = problemService.getSampleExcel();
 
