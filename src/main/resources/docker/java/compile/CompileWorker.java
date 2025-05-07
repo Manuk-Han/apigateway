@@ -2,7 +2,7 @@ import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.commons.text.StringEscapeUtils; // ★ escape 처리
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -54,7 +54,7 @@ public class CompileWorker {
         Files.createDirectories(workDir);
 
         Path codeFile = workDir.resolve("Main.java");
-        String formattedCode = StringEscapeUtils.unescapeJava(code); // ★ escape 해제
+        String formattedCode = StringEscapeUtils.unescapeJava(code);
         Files.writeString(codeFile, formattedCode);
 
         Process compile = new ProcessBuilder("javac", codeFile.toString())
@@ -65,13 +65,14 @@ public class CompileWorker {
 
         if (compile.exitValue() != 0) {
             String error = new String(compile.getInputStream().readAllBytes());
-            sendResultToServer(submissionId, userId, language, 0, Status.ERROR, error, resultEndpoint);
+            sendResultToServer(submissionId, userId, language, 0, Status.ERROR, error, 0.0, resultEndpoint);
             return;
         }
 
-        String testcaseDir = "/" + problemId + "/testcases/" + problemId + "/testcase";
+        String testcaseDir = "/app/testcases/" + problemId + "/testcase/";
         int totalScore = 0;
         int numCases = 0;
+        double totalTime = 0.0;
 
         for (int i = 1; ; i++) {
             Path inputFile = Paths.get(testcaseDir, "input" + i + ".txt");
@@ -79,15 +80,24 @@ public class CompileWorker {
             if (!Files.exists(inputFile) || !Files.exists(outputFile)) break;
 
             Path resultFile = workDir.resolve("actual" + i + ".txt");
+            long start = System.nanoTime();
             Process run = new ProcessBuilder("timeout", "3s", "java", "Main")
                     .directory(workDir.toFile())
                     .redirectInput(inputFile.toFile())
                     .redirectOutput(resultFile.toFile())
                     .start();
             run.waitFor();
+            long end = System.nanoTime();
+
+            double executionTime = (end - start) / 1_000_000_000.0;
+            totalTime += executionTime;
 
             String actual = Files.readString(resultFile).strip();
             String expected = Files.readString(outputFile).strip();
+
+            System.out.println("[TESTCASE " + i + "] Actual: " + actual);
+            System.out.println("[TESTCASE " + i + "] Expected: " + expected);
+
             if (actual.equals(expected)) {
                 totalScore += 100;
             }
@@ -95,7 +105,9 @@ public class CompileWorker {
         }
 
         int score = numCases == 0 ? 0 : totalScore / numCases;
-        sendResultToServer(submissionId, userId, language, score, Status.PASS, "", resultEndpoint);
+        double avgExecutionTime = numCases == 0 ? 0.0 : totalTime / numCases;
+
+        sendResultToServer(submissionId, userId, language, score, Status.PASS, "", avgExecutionTime, resultEndpoint);
 
         String doneJson = String.format("{\"submitId\":\"%s\",\"problemId\":\"%s\",\"userId\":\"%s\",\"language\":\"%s\"}",
                 submissionId, problemId, userId, language);
@@ -103,7 +115,7 @@ public class CompileWorker {
         System.out.println("[COMPILE + TESTCASE SUCCESS] sent to topic compile-done");
     }
 
-    private static void sendResultToServer(String submitId, String userId, String language, int score, Status status, String error, String endpoint) throws Exception {
+    private static void sendResultToServer(String submitId, String userId, String language, int score, Status status, String error, double executionTime, String endpoint) throws Exception {
         String apiKey = System.getenv().getOrDefault("RESULT_API_KEY", "WORKER-KEY");
 
         String body = String.format(
@@ -111,13 +123,11 @@ public class CompileWorker {
                         "\"submitId\":%s," +
                         "\"score\":%d," +
                         "\"status\":\"%s\"," +
-                        "\"executionTime\":0.0," +
+                        "\"executionTime\":%.3f," +
                         "\"errorDetail\":\"%s\"" +
                         "}",
-                submitId, score, status, error.replace("\"", "'")
+                submitId, score, status, executionTime, error.replace("\"", "'")
         );
-
-        System.out.println("\n-------------------" + body + "\n-------------------\n");
 
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
