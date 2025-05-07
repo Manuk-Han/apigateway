@@ -26,7 +26,7 @@ public class SubmitController {
                 .body(submitService.submitProblem(userId, courseUUId, submitForm));
     }
 
-    @GetMapping("/result")
+    @PostMapping("/result")
     public ResponseEntity<String> getResult(ReceiveResultForm receiveResultForm) {
         submitService.receiveSubmitResult(receiveResultForm);
 

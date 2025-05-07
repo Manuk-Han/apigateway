@@ -1,6 +1,5 @@
 package com.example.apigateway.form.submit;
 
-import com.example.apigateway.common.type.Language;
 import lombok.Data;
 import lombok.Getter;
 
@@ -11,5 +10,5 @@ public class SubmitForm {
 
     private String code;
 
-    private Language language;
+    private String language;
 }

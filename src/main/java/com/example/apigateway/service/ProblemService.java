@@ -103,7 +103,7 @@ public class ProblemService {
                                         .build())
                                 .toList();
 
-                        createProblemTestCase(eventList, problem.getProblemId()); // ✅ 이벤트 발행
+                        createProblemTestCase(eventList, problem.getProblemId());
                     }))
                     .subscribeOn(Schedulers.boundedElastic())
                     .thenReturn(problem.getProblemId());

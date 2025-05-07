@@ -3,6 +3,7 @@ package com.example.apigateway.common.kafka;
 import com.example.apigateway.common.type.Language;
 import lombok.*;
 
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

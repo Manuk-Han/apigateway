@@ -12,8 +12,8 @@ import java.util.*;
 
 public class CompileWorker {
     public static void main(String[] args) throws Exception {
-        String kafkaServer = System.getenv().getOrDefault("KAFKA_SERVERS", "kafka:9092");
-        String resultEndpoint = System.getenv().getOrDefault("RESULT_ENDPOINT", "http://submit:8082/result");
+        String kafkaServer = System.getenv().getOrDefault("KAFKA_SERVERS", "http://host.docker.internal:9092");
+        String resultEndpoint = System.getenv().getOrDefault("RESULT_ENDPOINT", "http://host.docker.internal:8082/result");
 
         Properties consumerProps = new Properties();
         consumerProps.put("bootstrap.servers", kafkaServer);
@@ -54,7 +54,6 @@ public class CompileWorker {
         Path codeFile = workDir.resolve("Main.java");
         Files.writeString(codeFile, code);
 
-        // 컴파일 단계
         Process compile = new ProcessBuilder("javac", codeFile.toString())
                 .directory(workDir.toFile())
                 .redirectErrorStream(true)
@@ -67,21 +66,59 @@ public class CompileWorker {
             return;
         }
 
-        // 성공 시 컴파일 완료 토픽 전송
+        String testcaseDir = "/" + problemId + "/testcases/" + problemId + "/testcase";
+        int totalScore = 0;
+        int numCases = 0;
+
+        for (int i = 1; ; i++) {
+            Path inputFile = Paths.get(testcaseDir, "input" + i + ".txt");
+            Path outputFile = Paths.get(testcaseDir, "output" + i + ".txt");
+            if (!Files.exists(inputFile) || !Files.exists(outputFile)) break;
+
+            Path resultFile = workDir.resolve("actual" + i + ".txt");
+            Process run = new ProcessBuilder("timeout", "3s", "java", "Main")
+                    .directory(workDir.toFile())
+                    .redirectInput(inputFile.toFile())
+                    .redirectOutput(resultFile.toFile())
+                    .start();
+            run.waitFor();
+
+            String actual = Files.readString(resultFile).strip();
+            String expected = Files.readString(outputFile).strip();
+            if (actual.equals(expected)) {
+                totalScore += 100;
+            }
+            numCases++;
+        }
+
+        int score = numCases == 0 ? 0 : totalScore / numCases;
+        sendResultToServer(submissionId, userId, language, score, "SUCCESS", "", resultEndpoint);
+
         String doneJson = String.format("{\"submitId\":\"%s\",\"problemId\":\"%s\",\"userId\":\"%s\",\"language\":\"%s\"}",
                 submissionId, problemId, userId, language);
         producer.send(new ProducerRecord<>("compile-done", doneJson));
-        System.out.println("[COMPILE SUCCESS] sent to topic compile-done");
+        System.out.println("[COMPILE + TESTCASE SUCCESS] sent to topic compile-done");
     }
 
     private static void sendResultToServer(String submitId, String userId, String language, int score, String status, String error, String endpoint) throws Exception {
-        String body = String.format("{\"submitId\":\"%s\",\"accountId\":\"%s\",\"language\":\"%s\",\"score\":%d,\"status\":\"%s\",\"output\":\"\",\"error\":\"%s\"}",
-                submitId, userId, language, score, status, error.replace("\"", "'"));
+        String apiKey = System.getenv().getOrDefault("RESULT_API_KEY", "WORKER-KEY");
+
+        String body = String.format(
+                "{" +
+                        "\"submissionId\":\"%s\"," +
+                        "\"score\":%d," +
+                        "\"status\":\"%s\"," +
+                        "\"executionTime\":0.0," +
+                        "\"errorDetail\":\"%s\"" +
+                        "}",
+                submitId, score, status, error.replace("\"", "'")
+        );
 
         URL url = new URL(endpoint);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("X-API-KEY", apiKey);
         con.setDoOutput(true);
 
         try (OutputStream os = con.getOutputStream()) {
@@ -94,7 +131,11 @@ public class CompileWorker {
     }
 
     private static String extractJson(String json, String key) {
-        String pattern = "\"" + key + "\":\"(.*?)\"";
-        return json.replaceAll(".*" + pattern + ".*", "$1");
+        String pattern = "\"" + key + "\":(?:\"(.*?)\"|(\\d+))";
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(pattern).matcher(json);
+        if (matcher.find()) {
+            return matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+        }
+        return "";
     }
 }

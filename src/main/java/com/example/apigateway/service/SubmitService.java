@@ -46,18 +46,18 @@ public class SubmitService {
                 .student(userRepository.findById(userId)
                         .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT)))
                 .code(submitForm.getCode())
-                .language(Language.getLanguage(String.valueOf(submitForm.getLanguage())))
+                .language(Language.getLanguage(submitForm.getLanguage()))
                 .build();
 
         submitRepository.save(submit);
 
-        String topic = "submission-" + submitForm.getLanguage();
+        String topic = "submission-" + Language.getLanguage(submitForm.getLanguage());
         KafkaSubmitForm kafkaSubmitForm = KafkaSubmitForm.builder()
                 .submitId(submit.getSubmitId())
                 .problemId(problem.getProblemId())
                 .userId(userId)
                 .code(submitForm.getCode())
-                .language(submitForm.getLanguage())
+                .language(Language.getLanguage(submitForm.getLanguage()))
                 .build();
         String payload = objectMapper.writeValueAsString(kafkaSubmitForm);
 
