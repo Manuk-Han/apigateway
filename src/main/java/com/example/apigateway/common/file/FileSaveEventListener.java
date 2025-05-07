@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -21,23 +22,25 @@ import java.nio.file.Paths;
 @Component
 @RequiredArgsConstructor
 public class FileSaveEventListener {
-    @Value("${file.testcase.path}")
-    private static String PATH_PREFIX;
+    @Value("${file.save.testcase.path}")
+    private String PATH_PREFIX;
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void signatureFileSaveEvent(TestcaseFileSaveEvent testcase) {
         try {
-            saveStringToFile(testcase.getInputContent(), testcase.getProblemId(), testcase.getNum());
-            saveStringToFile(testcase.getOutputContent(), testcase.getProblemId(), testcase.getNum());
+            Path dir = Paths.get(PATH_PREFIX + "/problem/" + testcase.getProblemId() + "/testcase");
+            Files.createDirectories(dir);
+
+            Path input = dir.resolve("input" + testcase.getNum() + ".txt");
+            Path output = dir.resolve("output" + testcase.getNum() + ".txt");
+
+            Files.write(input, testcase.getInputContent().getBytes());
+            Files.write(output, testcase.getOutputContent().getBytes());
         } catch (IOException e) {
-            log.error("Error saving user signature file: {}", e.getMessage());
+            log.error("파일 저장 실패: {}", e.getMessage());
             throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
         }
     }
 
-    public static void saveStringToFile(String content, Long problemId, int num) throws IOException {
-        Path path = Paths.get(PATH_PREFIX + "/problem/" + problemId + "/testcase/input" + num + ".txt");
-        Files.write(path, content.getBytes());
-    }
 }

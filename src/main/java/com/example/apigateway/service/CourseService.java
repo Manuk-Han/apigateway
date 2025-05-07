@@ -173,7 +173,7 @@ public class CourseService {
         return course.getCourseId();
     }
 
-    @Value("${file.invite.path}")
+    @Value("${file.sampel.invite.path}")
     private String sampleExcelFilePath;
 
     public byte[] getSampleExcel() throws IOException {

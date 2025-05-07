@@ -1,30 +1,25 @@
 package com.example.apigateway.common.file;
 
-import com.example.apigateway.common.exception.CustomException;
-import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.dto.course.InviteStudentDto;
+import com.example.apigateway.dto.problem.TestCaseDto;
 import com.example.apigateway.entity.Course;
 import com.example.apigateway.entity.Participant;
 import com.example.apigateway.entity.Problem;
-import com.example.apigateway.entity.TestCase;
-import com.example.apigateway.repository.*;
+import com.example.apigateway.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExcelUtil {
     private final ParticipantRepository participantRepository;
-    private final TestCaseRepository testCaseRepository;
     private final FileUtil fileUtil;
-
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     public Mono<List<InviteStudentDto>> parseExcelToStudents(FilePart file, Course course) {
         return Mono.fromCallable(() -> {
@@ -78,52 +70,31 @@ public class ExcelUtil {
                 .then();
     }
 
-    public Mono<Void> addTestCaseByExcel(Problem problem, FilePart file) {
-        return Mono.fromCallable(() -> File.createTempFile("upload-", file.filename()))  // ✅ 여기 return 추가
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(tempFile -> file.transferTo(tempFile)
-                        .then(Mono.fromRunnable(() -> {
-                            try (InputStream inputStream = new FileInputStream(tempFile)) {
-                                Workbook workbook = new XSSFWorkbook(inputStream);
-                                Sheet sheet = workbook.getSheetAt(0);
+    public Mono<List<TestCaseDto>> parseExcelToTestcases(FilePart file, Problem problem) {
+        return Mono.fromCallable(() -> {
+            File tempFile = File.createTempFile("upload-", file.filename());
+            file.transferTo(tempFile).block();
 
-                                int num = 1;
-                                for (Row row : sheet) {
-                                    if (row.getRowNum() == 0) continue;
+            try (InputStream inputStream = new FileInputStream(tempFile)) {
+                Workbook workbook = new XSSFWorkbook(inputStream);
+                Sheet sheet = workbook.getSheetAt(0);
 
-                                    String input = getCellValue(row.getCell(0));
-                                    String output = getCellValue(row.getCell(1));
+                int num = 1;
+                List<TestCaseDto> result = new ArrayList<>();
+                for (Row row : sheet) {
+                    if (row.getRowNum() == 0) continue;
 
-                                    if (input.isEmpty() || output.isEmpty()) {
-                                        throw new CustomException(CustomResponseException.INVALID_TESTCASE);
-                                    }
-
-                                    applicationEventPublisher.publishEvent(
-                                            TestcaseFileSaveEvent.builder()
-                                                    .inputContent(input)
-                                                    .outputContent(output)
-                                                    .problemId(problem.getProblemId())
-                                                    .num(num++)
-                                                    .build()
-                                    );
-                                }
-                            } catch (IOException e) {
-                                throw new CustomException(CustomResponseException.INVALID_EXCEL_FILE);
-                            } finally {
-                                tempFile.delete();
-                            }
-                        }))
-                        .then(fileUtil.save(file, "/problem/" + problem.getProblemId() + "/excel/"))
-                        .doOnNext(savedPath -> {
-                            testCaseRepository.save(TestCase.builder()
-                                    .problem(problem)
-                                    .savedFileName(savedPath.substring(savedPath.lastIndexOf("/") + 1))
-                                    .originalFileName(file.filename())
-                                    .filePath("/problem/" + problem.getProblemId() + "/excel/")
-                                    .build());
-                        })
-                        .then()
-                );
+                    result.add(TestCaseDto.builder()
+                            .num(num++)
+                            .input(getCellValue(row.getCell(0)))
+                            .output(getCellValue(row.getCell(1)))
+                            .build());
+                }
+                return result;
+            } finally {
+                tempFile.delete();
+            }
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     private String getCellValue(Cell cell) {
