@@ -139,7 +139,7 @@ public class ResultService {
         Result result = resultRepository.findById(feedbackForm.getResultId())
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
 
-        result.setFeedback(feedbackForm.getFeedback());
+        result.update(feedbackForm);
         resultRepository.save(result);
 
         return result.getResultId();

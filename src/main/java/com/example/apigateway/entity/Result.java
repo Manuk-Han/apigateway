@@ -1,6 +1,7 @@
 package com.example.apigateway.entity;
 
 import com.example.apigateway.common.type.Status;
+import com.example.apigateway.form.result.FeedbackForm;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,8 @@ public class Result {
     @JoinColumn(name = "submit_id")
     private Submit submit;
 
-    public void setFeedback(String feedback) {
-        this.feedback = feedback;
+    public void update(FeedbackForm feedbackForm) {
+        this.feedback = feedbackForm.getFeedback() == null ? null : feedbackForm.getFeedback();
+        this.status = feedbackForm.getStatus() != null ? feedbackForm.getStatus() : this.status;
     }
 }
