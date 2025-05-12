@@ -65,7 +65,7 @@ public class CompileWorker {
 
         if (compile.exitValue() != 0) {
             String error = new String(compile.getInputStream().readAllBytes());
-            sendResultToServer(submissionId, userId, language, 0, Status.ERROR, error, 0.0, resultEndpoint);
+            sendResultToServer(submissionId, userId, language, 0, error, 0.0, resultEndpoint);
             return;
         }
 
@@ -107,7 +107,7 @@ public class CompileWorker {
         int score = numCases == 0 ? 0 : totalScore / numCases;
         double avgExecutionTime = numCases == 0 ? 0.0 : totalTime / numCases;
 
-        sendResultToServer(submissionId, userId, language, score, score == 100 ? Status.CORRECT : Status.WRONG, "", avgExecutionTime, resultEndpoint);
+        sendResultToServer(submissionId, userId, language, score, "", avgExecutionTime, resultEndpoint);
 
         String doneJson = String.format("{\"submitId\":\"%s\",\"problemId\":\"%s\",\"userId\":\"%s\",\"language\":\"%s\"}",
                 submissionId, problemId, userId, language);
@@ -115,7 +115,7 @@ public class CompileWorker {
         System.out.println("[COMPILE + TESTCASE SUCCESS] sent to topic compile-done");
     }
 
-    private static void sendResultToServer(String submitId, String userId, String language, int score, Status status, String error, double executionTime, String endpoint) throws Exception {
+    private static void sendResultToServer(String submitId, String userId, String language, int score, String error, double executionTime, String endpoint) throws Exception {
         String apiKey = System.getenv().getOrDefault("RESULT_API_KEY", "WORKER-KEY");
         String safeError = StringEscapeUtils.escapeJson(error);
 
@@ -123,11 +123,10 @@ public class CompileWorker {
                 "{" +
                         "\"submitId\":%s," +
                         "\"score\":%d," +
-                        "\"status\":\"%s\"," +
                         "\"executionTime\":%.3f," +
                         "\"errorDetail\":\"%s\"" +
                         "}",
-                submitId, score, status, executionTime, safeError
+                submitId, score, executionTime, safeError
         );
 
         URL url = new URL(endpoint);
@@ -165,11 +164,3 @@ public class CompileWorker {
     }
 }
 
-enum Status {
-    CORRECT,
-    WRONG,
-    REJECTED,
-    PASS,
-    ERROR,
-    NOT_SUBMITTED
-}

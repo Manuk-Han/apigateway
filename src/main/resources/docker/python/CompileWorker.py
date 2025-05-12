@@ -23,11 +23,10 @@ producer = KafkaProducer(
     value_serializer=lambda m: json.dumps(m).encode('utf-8')
 )
 
-def send_result(submit_id, user_id, language, score, status, error_detail, execution_time):
+def send_result(submit_id, user_id, language, score, error_detail, execution_time):
     body = {
         "submitId": submit_id,
         "score": score,
-        "status": status,
         "executionTime": round(execution_time, 3),
         "errorDetail": error_detail
     }
@@ -60,7 +59,7 @@ def handle_submission(data):
     # Syntax check first
     syntax = subprocess.run(["python3", "-m", "py_compile", code_path], capture_output=True, text=True)
     if syntax.returncode != 0:
-        send_result(submit_id, user_id, language, 0, "ERROR", syntax.stderr, 0.0)
+        send_result(submit_id, user_id, language, 0, syntax.stderr, 0.0)
         return
 
     testcase_dir = f"/app/testcases/{problem_id}/testcase"
@@ -97,9 +96,7 @@ def handle_submission(data):
     avg_time = total_time / num_cases if num_cases > 0 else 0.0
     score = total_score // num_cases if num_cases > 0 else 0
 
-    status = "CORRECT" if score == 100 else "WRONG"
-
-    send_result(submit_id, user_id, language, score, status, "", avg_time)
+    send_result(submit_id, user_id, language, score, "", avg_time)
 
     done_msg = {
         "submitId": submit_id,

@@ -12,8 +12,6 @@ public class ReceiveResultForm {
 
     private int score;
 
-    private Status status;
-
     private double executionTime;
 
     private String errorDetail;

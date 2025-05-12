@@ -53,7 +53,6 @@ def process_submission(data):
             post_result({
                 "submitId": submit_id,
                 "score": 0,
-                "status": "ERROR",
                 "executionTime": 0.0,
                 "errorDetail": "Compilation failed"
             })
@@ -93,7 +92,6 @@ def process_submission(data):
         post_result({
             "submitId": submit_id,
             "score": score,
-            "status": status,
             "executionTime": round(avg_time, 3),
             "errorDetail": ""
         })

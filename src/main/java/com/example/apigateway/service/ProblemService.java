@@ -4,6 +4,7 @@ import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.file.TestcaseFileSaveEvent;
+import com.example.apigateway.common.type.Status;
 import com.example.apigateway.dto.problem.ExampleDto;
 import com.example.apigateway.dto.problem.ProblemDetailDto;
 import com.example.apigateway.dto.problem.ProblemDto;
@@ -42,6 +43,7 @@ public class ProblemService {
     private final RestrictionRepository restrictionRepository;
     private final ExampleRepository exampleRepository;
     private final ProblemRepository problemRepository;
+    private final ResultRepository resultRepository;
     private final ExcelUtil excelUtil;
     private final ValidateUtil validateUtil;
 
@@ -158,7 +160,7 @@ public class ProblemService {
                                         .build())
                                 .toList();
 
-                        createProblemTestCase(eventList, problem.getProblemId()); // ✅ 이벤트 발행
+                        createProblemTestCase(eventList, problem.getProblemId());
                     }))
                     .subscribeOn(Schedulers.boundedElastic())
                     .thenReturn(problem.getProblemId());
@@ -202,6 +204,7 @@ public class ProblemService {
                                     .problemTitle(problem.getProblemTitle())
                                     .startDate(problem.getStartDate())
                                     .endDate(problem.getEndDate())
+                                    .status(Status.getByPriority(resultRepository.getBestStatusPriority(userId, courseUUId, problem.getProblemId())))
                                     .build())
                     .map(problemStudentDto -> (ProblemDto) problemStudentDto)
                     .toList();

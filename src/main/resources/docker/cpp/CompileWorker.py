@@ -63,7 +63,6 @@ for msg in consumer:
             send_result({
                 "submitId": submit_id,
                 "score": 0,
-                "status": "ERROR",
                 "executionTime": 0.0,
                 "errorDetail": result.stderr
             })
@@ -72,7 +71,6 @@ for msg in consumer:
         send_result({
             "submitId": submit_id,
             "score": 0,
-            "status": "ERROR",
             "executionTime": 0.0,
             "errorDetail": "Compilation timeout"
         })
@@ -116,7 +114,6 @@ for msg in consumer:
     send_result({
         "submitId": submit_id,
         "score": final_score,
-        "status": status,
         "executionTime": round(avg_time, 3),
         "errorDetail": ""
     })

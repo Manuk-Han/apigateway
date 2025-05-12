@@ -7,26 +7,34 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Status {
-    CORRECT("CORRECT"),
-    WRONG("WRONG"),
-    REJECT("REJECTED"),
-    PASS("PASS"),
-    ERROR("ERROR"),
-    NOT_SUBMITTED("NOT_SUBMITTED");
+    PASS("PASS", 1),
+    REJECT("REJECTED", 2),
+    CORRECT("CORRECT", 3),
+    WRONG("WRONG", 4),
+    ERROR("ERROR", 5),
+    NOT_SUBMITTED("NOT_SUBMITTED", 6);
 
     private final String value;
+    private final int priority;
 
     @JsonValue
     public String getValue() {
         return value;
     }
 
-    public static Status fromString(String status) {
-        for (Status s : Status.values()) {
-            if (s.getValue().equalsIgnoreCase(status)) {
-                return s;
+    public static Status getByPriority(Integer priority) {
+        if (priority == null) {
+            return Status.NOT_SUBMITTED;
+        }
+
+        for (Status status : Status.values()) {
+            if (status.getPriority() == priority) {
+                return status;
             }
         }
-        throw new IllegalArgumentException("No enum constant " + Status.class.getCanonicalName() + "." + status);
+
+        return Status.NOT_SUBMITTED;
     }
+
 }
+

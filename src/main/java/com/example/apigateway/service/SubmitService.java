@@ -73,8 +73,9 @@ public class SubmitService {
                     .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
 
             Status status;
-            if (resultForm.getStatus() == Status.PASS) status = Status.CORRECT;
-            else status = resultForm.getStatus();
+            if (resultForm.getScore() == 100) status = Status.CORRECT;
+            else if (resultForm.getErrorDetail() != null) status = Status.ERROR;
+            else status = Status.WRONG;
 
             Result result = Result.builder()
                     .submit(submit)
