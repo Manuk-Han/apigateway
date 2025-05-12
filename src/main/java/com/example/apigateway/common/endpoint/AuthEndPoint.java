@@ -10,6 +10,7 @@ public enum AuthEndPoint implements EndPoint {
     SIGN_IN("/sign-in"),
     REFRESH("/refresh"),
     UPDATE_PASSWORD("/update-password"),
+    RESET_PASSWORD("/reset-password"),
     WITHDRAWAL("/withdraw", Role.USER),
     CANCEL_WITHDRAWAL("/cancel-withdraw", Role.USER),
     CHECK_WITHDRAWAL("/check/cancel-withdraw", Role.ADMIN),
