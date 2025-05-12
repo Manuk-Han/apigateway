@@ -10,4 +10,6 @@ public class CourseDto {
     private String courseUUid;
 
     private String courseName;
+
+    private String creatorName;
 }

@@ -60,6 +60,7 @@ public class CourseService {
                 .map(course -> CourseDto.builder()
                         .courseName(course.getCourseName())
                         .courseUUid(course.getCourseUUid())
+                        .creatorName(course.getOwner().getName())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -72,6 +73,7 @@ public class CourseService {
                 .map(courseStudent -> CourseDto.builder()
                         .courseName(courseStudent.getCourse().getCourseName())
                         .courseUUid(courseStudent.getCourse().getCourseUUid())
+                        .creatorName(courseStudent.getCourse().getOwner().getName())
                         .build())
                 .collect(Collectors.toList());
     }

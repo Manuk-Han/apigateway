@@ -20,7 +20,9 @@ public class IpAddressFilter implements WebFilter {
             "::1",
             "0:0:0:0:0:0:0:1",
             "192.168.50.46",
-            "192.168.1.23"
+            "192.168.1.23",
+            "192.168.1.5",
+            "192.168.1.57"
     );
 
     @Override
