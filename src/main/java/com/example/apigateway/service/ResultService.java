@@ -3,7 +3,9 @@ package com.example.apigateway.service;
 import com.example.apigateway.common.exception.CustomException;
 import com.example.apigateway.common.exception.CustomResponseException;
 import com.example.apigateway.dto.result.ResultDetailDto;
+import com.example.apigateway.dto.result.ResultDetailManagerDto;
 import com.example.apigateway.dto.result.ResultDto;
+import com.example.apigateway.dto.result.ResultManagerDto;
 import com.example.apigateway.entity.Course;
 import com.example.apigateway.entity.Problem;
 import com.example.apigateway.entity.Result;
@@ -57,7 +59,6 @@ public class ResultService {
                             .score(result.getScore())
                             .language(submit.getLanguage())
                             .submitTime(submit.getSubmitTime())
-                            .accountId(user.getAccountId())
                             .build();
 
                     resultDtoList.add(resultDto);
@@ -79,7 +80,7 @@ public class ResultService {
                     Result result = resultRepository.findResultBySubmit(submit)
                             .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
 
-                    ResultDto resultDto = ResultDto.builder()
+                    ResultManagerDto resultDto = ResultManagerDto.builder()
                             .resultId(result.getResultId())
                             .submitId(submit.getSubmitId())
                             .status(result.getStatus())
@@ -87,6 +88,7 @@ public class ResultService {
                             .language(submit.getLanguage())
                             .submitTime(submit.getSubmitTime())
                             .accountId(submit.getStudent().getAccountId())
+                            .name(submit.getStudent().getName())
                             .build();
 
                     resultDtoList.add(resultDto);
@@ -96,22 +98,39 @@ public class ResultService {
     }
 
     public ResultDetailDto getResultDetail(Long userId, String courseUUId, Long resultId) {
-        validateUtil.validateCourseMember(userId, courseUUId);
+        if(validateUtil.checkCourseOwner(userId, courseUUId)) {
+            Result result = resultRepository.findById(resultId)
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
 
-        Result result = resultRepository.findById(resultId)
-                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
+            return ResultDetailManagerDto.builder()
+                    .resultId(result.getResultId())
+                    .submitId(result.getSubmit().getSubmitId())
+                    .status(result.getStatus())
+                    .score(result.getScore())
+                    .language(result.getSubmit().getLanguage())
+                    .submitTime(result.getSubmit().getSubmitTime())
+                    .errorMessage(result.getErrorDetail())
+                    .feedback(result.getFeedback())
+                    .accountId(result.getSubmit().getStudent().getAccountId())
+                    .name(result.getSubmit().getStudent().getName())
+                    .build();
+        } else {
+            validateUtil.validateCourseMember(userId, courseUUId);
 
-        return ResultDetailDto.builder()
-                .resultId(result.getResultId())
-                .submitId(result.getSubmit().getSubmitId())
-                .status(result.getStatus())
-                .score(result.getScore())
-                .language(result.getSubmit().getLanguage())
-                .submitTime(result.getSubmit().getSubmitTime())
-                .accountId(result.getSubmit().getStudent().getAccountId())
-                .errorMessage(result.getErrorDetail())
-                .feedback(result.getFeedback())
-                .build();
+            Result result = resultRepository.findById(resultId)
+                    .orElseThrow(() -> new CustomException(CustomResponseException.NOT_SCORE_YET));
+
+            return ResultDetailDto.builder()
+                    .resultId(result.getResultId())
+                    .submitId(result.getSubmit().getSubmitId())
+                    .status(result.getStatus())
+                    .score(result.getScore())
+                    .language(result.getSubmit().getLanguage())
+                    .submitTime(result.getSubmit().getSubmitTime())
+                    .errorMessage(result.getErrorDetail())
+                    .feedback(result.getFeedback())
+                    .build();
+        }
     }
 
     public Long setFeedback(Long userId, String courseUUId, FeedbackForm feedbackForm) {

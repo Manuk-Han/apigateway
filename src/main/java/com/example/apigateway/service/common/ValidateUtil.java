@@ -46,4 +46,11 @@ public class ValidateUtil {
 
         return course;
     }
+
+    public boolean checkCourseOwner(Long userId, String courseUUId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        return courseRepository.existsCourseByCourseUUidAndOwner(courseUUId, user);
+    }
 }

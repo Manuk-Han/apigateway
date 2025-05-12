@@ -6,11 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResultDto {
@@ -25,6 +26,4 @@ public class ResultDto {
     private Language language;
 
     private LocalDateTime submitTime;
-
-    private String accountId;
 }

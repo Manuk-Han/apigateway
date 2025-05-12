@@ -13,4 +13,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     Optional<Course> findCourseByCourseUUid(String courseUUid);
 
     List<Course> findAllByOwner(User user);
+
+    boolean existsCourseByCourseUUidAndOwner(String courseUUid, User user);
 }

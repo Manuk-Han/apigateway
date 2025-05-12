@@ -14,20 +14,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResultDetailDto {
-    private Long resultId;
+public class ResultDetailManagerDto extends ResultDetailDto {
+    private String accountId;
 
-    private Long submitId;
-
-    private int score;
-
-    private Language language;
-
-    private Status status;
-
-    private LocalDateTime submitTime;
-
-    private String errorMessage;
-
-    private String feedback;
+    private String name;
 }

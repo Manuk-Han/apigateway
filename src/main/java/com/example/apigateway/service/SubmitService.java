@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Profile("submit")
 @Service
@@ -48,6 +49,7 @@ public class SubmitService {
                         .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT)))
                 .code(submitForm.getCode())
                 .language(Language.getLanguage(submitForm.getLanguage()))
+                .submitTime(LocalDateTime.now())
                 .build();
 
         submitRepository.save(submit);
