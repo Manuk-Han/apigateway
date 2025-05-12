@@ -74,7 +74,7 @@ public class SubmitService {
 
             Status status;
             if (resultForm.getScore() == 100) status = Status.CORRECT;
-            else if (resultForm.getErrorDetail() != null) status = Status.ERROR;
+            else if (!resultForm.getErrorDetail().isBlank()) status = Status.ERROR;
             else status = Status.WRONG;
 
             Result result = Result.builder()

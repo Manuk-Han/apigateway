@@ -109,8 +109,6 @@ for msg in consumer:
     avg_time = total_time / num_cases if num_cases else 0
     final_score = total_score // num_cases if num_cases else 0
 
-    status = "CORRECT" if score == 100 else "WRONG"
-
     send_result({
         "submitId": submit_id,
         "score": final_score,
