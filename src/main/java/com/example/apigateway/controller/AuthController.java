@@ -49,6 +49,14 @@ public class AuthController {
         authService.updatePassword(accessToken, updatePasswordForm);
     }
 
+    @GetMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(String accountId, String email) {
+        authService.resetPassword(accountId, email);
+
+        return ResponseEntity.status(200)
+                .body("Reset password email sent successfully");
+    }
+
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(@RequestHeader("Authorization") String accessToken, WithdrawForm withdrawForm) {
         String accountId = authService.withdraw(accessToken, withdrawForm);
@@ -57,8 +65,11 @@ public class AuthController {
     }
 
     @PostMapping("/cancel-withdraw")
-    public void cancelWithdraw(CancelWithdrawForm cancelWithdrawForm) {
+    public ResponseEntity<?> cancelWithdraw(CancelWithdrawForm cancelWithdrawForm) {
         authService.cancelWithdraw(cancelWithdrawForm);
+
+        return ResponseEntity.status(200)
+                .body("Cancel withdraw email sent successfully");
     }
 
     @PostMapping("/check/cancel-withdraw")

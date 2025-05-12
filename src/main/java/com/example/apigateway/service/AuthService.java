@@ -100,6 +100,21 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public void resetPassword(String accountId, String email) {
+        User user = userRepository.findByAccountIdAndEmail(accountId, email)
+                .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_ACCOUNT));
+
+        String code = UUID.randomUUID().toString();
+        user.updatePassword(bCryptPasswordEncoder.encode(code));
+
+        htmlEmailService.sendEmail(
+                EmailMessage.builder()
+                        .to(user.getEmail())
+                        .message("초기화된 비밀번호 : " + code)
+                        .build()
+        );
+    }
+
     public String withdraw(String accessToken, WithdrawForm withdrawForm) {
         Long userId = jwtTokenProvider.getUserId(accessToken);
         User user = userRepository.findById(userId)
