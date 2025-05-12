@@ -7,6 +7,7 @@ import com.example.apigateway.common.file.TestcaseFileSaveEvent;
 import com.example.apigateway.dto.problem.ExampleDto;
 import com.example.apigateway.dto.problem.ProblemDetailDto;
 import com.example.apigateway.dto.problem.ProblemDto;
+import com.example.apigateway.dto.problem.ProblemStudentDto;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.problem.ProblemCreateForm;
 import com.example.apigateway.form.problem.ProblemUpdateForm;
@@ -187,6 +188,7 @@ public class ProblemService {
                                     .startDate(problem.getStartDate())
                                     .endDate(problem.getEndDate())
                                     .build())
+                    .map(problemDto -> (ProblemDto) problemDto)
                     .toList();
         } else {
             Course course = validateUtil.validateCourseMember(userId, courseUUId);
@@ -195,12 +197,13 @@ public class ProblemService {
                     .getProblemList()
                     .stream()
                     .map(problem ->
-                            ProblemDto.builder()
+                            ProblemStudentDto.builder()
                                     .problemId(problem.getProblemId())
                                     .problemTitle(problem.getProblemTitle())
                                     .startDate(problem.getStartDate())
                                     .endDate(problem.getEndDate())
                                     .build())
+                    .map(problemStudentDto -> (ProblemDto) problemStudentDto)
                     .toList();
         }
     }

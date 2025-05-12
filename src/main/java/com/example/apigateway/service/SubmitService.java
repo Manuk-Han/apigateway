@@ -72,10 +72,14 @@ public class SubmitService {
             Submit submit = submitRepository.findById(resultForm.getSubmitId())
                     .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_SUBMIT));
 
+            Status status;
+            if (resultForm.getStatus() == Status.PASS) status = Status.CORRECT;
+            else status = resultForm.getStatus();
+
             Result result = Result.builder()
                     .submit(submit)
                     .score(resultForm.getScore())
-                    .status(Status.fromString(resultForm.getStatus()))
+                    .status(status)
                     .executionTime(resultForm.getExecutionTime())
                     .errorDetail(resultForm.getErrorDetail())
                     .build();

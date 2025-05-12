@@ -1,22 +1,15 @@
 package com.example.apigateway.dto.problem;
 
+import com.example.apigateway.common.type.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
-
 @Data
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProblemDto {
-    private Long problemId;
-
-    private String problemTitle;
-
-    private LocalDate startDate;
-
-    private LocalDate endDate;
+public class ProblemStudentDto extends ProblemDto {
+    private Status status;
 }

@@ -12,7 +12,7 @@ public class ReceiveResultForm {
 
     private int score;
 
-    private String status;
+    private Status status;
 
     private double executionTime;
 
