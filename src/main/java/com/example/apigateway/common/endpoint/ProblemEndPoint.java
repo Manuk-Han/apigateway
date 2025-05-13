@@ -11,8 +11,8 @@ public enum ProblemEndPoint implements EndPoint {
     DELETE("/delete/**", Role.MANAGER),
     PROBLEM_LIST("/list/**"),
     PROBLEM_DETAIL("/detail/**"),
-    MANAGER_PROBLEM_LIST("/admin/all", Role.MANAGER),
-    MANAGER_PROBLEM_DETAIL("/admin/detail", Role.MANAGER),
+    MANAGER_PROBLEM_LIST("/admin/all", Role.ADMIN),
+    MANAGER_PROBLEM_DETAIL("/admin/detail", Role.ADMIN),
 //    REJUDGE("/rejudge/**", Role.MANAGER),
     ;
 
