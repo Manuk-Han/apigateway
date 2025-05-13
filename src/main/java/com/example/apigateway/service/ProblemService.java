@@ -28,6 +28,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -211,6 +212,18 @@ public class ProblemService {
         }
     }
 
+    public List<ProblemDto> getAdminProblemList(Long userId, String courseUUId) {
+        return problemBankRepository.findAll().stream()
+                .flatMap(problemBank -> problemBank.getProblemList().stream())
+                .map(problem -> ProblemDto.builder()
+                        .problemId(problem.getProblemId())
+                        .problemTitle(problem.getProblemTitle())
+                        .startDate(problem.getStartDate())
+                        .endDate(problem.getEndDate())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     public ProblemDetailDto getProblemDetail(Long userId, String courseUUId, Long problemId) {
         Course course = validateUtil.validateCourseMember(userId, courseUUId);
 
@@ -219,6 +232,17 @@ public class ProblemService {
         Problem problem = problemRepository.findByProblemIdAndProblemBank(problemId, problemBank).orElseThrow(
                 () -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
 
+        return makeProblemDetailDto(problem);
+    }
+
+    public ProblemDetailDto getAdminProblemDetail(Long userId, Long problemId) {
+        Problem problem = problemRepository.findById(problemId).orElseThrow(
+                () -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
+
+        return makeProblemDetailDto(problem);
+    }
+
+    public ProblemDetailDto makeProblemDetailDto(Problem problem) {
         return ProblemDetailDto.builder()
                 .problemId(problem.getProblemId())
                 .problemTitle(problem.getProblemTitle())

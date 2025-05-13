@@ -69,4 +69,16 @@ public class ProblemController {
 
         return ResponseEntity.ok().body("Problem deleted successfully");
     }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<ProblemDto>> getManagerProblemList(@RequestHeader("X-USER-ID") Long userId, @RequestParam String courseUUId) {
+        return ResponseEntity.ok()
+                .body(problemService.getAdminProblemList(userId, courseUUId));
+    }
+
+    @GetMapping("/admin/detail")
+    public ResponseEntity<ProblemDetailDto> getManagerProblemList(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) {
+        return ResponseEntity.ok()
+                .body(problemService.getAdminProblemDetail(userId, problemId));
+    }
 }
