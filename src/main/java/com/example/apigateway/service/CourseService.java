@@ -6,10 +6,7 @@ import com.example.apigateway.common.file.ExcelUtil;
 import com.example.apigateway.common.type.InviteType;
 import com.example.apigateway.common.type.Role;
 import com.example.apigateway.common.type.Status;
-import com.example.apigateway.dto.course.CourseDto;
-import com.example.apigateway.dto.course.CourseGradeDto;
-import com.example.apigateway.dto.course.InviteStudentDto;
-import com.example.apigateway.dto.course.StudentInfoDTO;
+import com.example.apigateway.dto.course.*;
 import com.example.apigateway.entity.*;
 import com.example.apigateway.form.course.AddStudentForm;
 import com.example.apigateway.form.course.CourseCreateForm;
@@ -255,44 +252,59 @@ public class CourseService {
         return course.getCourseId();
     }
 
-    public List<CourseGradeDto> getCourseGrade(Long userId, String courseUUid) {
+    public List<CourseGradeInfoDto> getCourseGrade(Long userId, String courseUUid) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
-        List<CourseGradeDto> courseGradeList = new ArrayList<>();
+        List<CourseGradeInfoDto> courseGradeInfoDtoList = new ArrayList<>();
 
         course.getProblemBank().getProblemList().forEach(
-                problem -> course.getCourseStudentList().forEach(
-                        student -> courseGradeList.add(makeCourseGradeDto(student.getUser(), problem,
-                                submitRepository.findTopScoreSubmitByProblemAndStudent(problem.getProblemId(), student.getUser().getUserId())))
-                )
+                problem -> {
+                    List<CourseGradeDto> courseGradeList = new ArrayList<>();
+
+                    course.getCourseStudentList().forEach(
+                            student ->
+                                    courseGradeList.add(makeCourseGradeDto(student.getUser(),
+                                            submitRepository.findTopScoreSubmitByProblemAndStudent(problem.getProblemId(), student.getUser().getUserId())))
+                    );
+
+                    courseGradeInfoDtoList.add(
+                            CourseGradeInfoDto.builder()
+                                    .problemId(problem.getProblemId())
+                                    .problemName(problem.getProblemTitle())
+                                    .courseGradeDtoList(courseGradeList)
+                                    .build()
+                    );
+                }
         );
 
-        return courseGradeList;
-    }
+        return courseGradeInfoDtoList;
+}
 
-    public List<CourseGradeDto> getCourseGradeWithProblem(Long userId, String courseUUid, Long problemId) {
+    public CourseGradeInfoDto getCourseGradeWithProblem(Long userId, String courseUUid, Long problemId) {
         Course course = validateUtil.validateCourseOwner(userId, courseUUid);
 
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new CustomException(CustomResponseException.NOT_FOUND_PROBLEM));
 
-        List<CourseGradeDto> courseGradeList = new ArrayList<>();
+        List<CourseGradeDto> courseGradeDtoList = new ArrayList<>();
 
         course.getCourseStudentList().forEach(
-                student -> courseGradeList.add(makeCourseGradeDto(student.getUser(), problem,
+                student -> courseGradeDtoList.add(makeCourseGradeDto(student.getUser(),
                         submitRepository.findTopScoreSubmitByProblemAndStudent(problem.getProblemId(), student.getUser().getUserId())))
         );
 
-        return courseGradeList;
+        return CourseGradeInfoDto.builder()
+                .problemId(problem.getProblemId())
+                .problemName(problem.getProblemTitle())
+                .courseGradeDtoList(courseGradeDtoList)
+                .build();
     }
 
-    private CourseGradeDto makeCourseGradeDto(User student, Problem problem, Submit submit) {
+    private CourseGradeDto makeCourseGradeDto(User student, Submit submit) {
         return submit == null ?
                 CourseGradeDto.builder()
                         .accountId(student.getAccountId())
                         .studentName(student.getName())
-                        .problemId(problem.getProblemId())
-                        .problemTitle(problem.getProblemTitle())
                         .status(Status.NOT_SUBMITTED)
                         .score(0)
                         .submitId(null)
@@ -301,8 +313,6 @@ public class CourseService {
                 CourseGradeDto.builder()
                         .accountId(student.getAccountId())
                         .studentName(student.getName())
-                        .problemId(problem.getProblemId())
-                        .problemTitle(problem.getProblemTitle())
                         .score(submit.getResult().getScore())
                         .status(submit.getResult().getStatus())
                         .submitId(submit.getSubmitId())

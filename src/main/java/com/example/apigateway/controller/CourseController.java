@@ -2,6 +2,7 @@ package com.example.apigateway.controller;
 
 import com.example.apigateway.dto.course.CourseDto;
 import com.example.apigateway.dto.course.CourseGradeDto;
+import com.example.apigateway.dto.course.CourseGradeInfoDto;
 import com.example.apigateway.dto.course.StudentInfoDTO;
 import com.example.apigateway.form.course.AddStudentByFileForm;
 import com.example.apigateway.form.course.AddStudentForm;
@@ -102,12 +103,12 @@ public class CourseController {
     }
 
     @GetMapping("/all/grade/{courseUUId}")
-    public ResponseEntity<List<CourseGradeDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId) throws IOException {
+    public ResponseEntity<List<CourseGradeInfoDto>> getCourseGrade(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGrade(userId, courseUUId));
     }
 
     @GetMapping("/problem/grade/{courseUUId}")
-    public ResponseEntity<List<CourseGradeDto>> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) throws IOException {
+    public ResponseEntity<CourseGradeInfoDto> getCourseGradeWithProblem(@RequestHeader("X-USER-ID") Long userId, @PathVariable String courseUUId, Long problemId) throws IOException {
         return ResponseEntity.ok(courseService.getCourseGradeWithProblem(userId, courseUUId, problemId));
     }
 }

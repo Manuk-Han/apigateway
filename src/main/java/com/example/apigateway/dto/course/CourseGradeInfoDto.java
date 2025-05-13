@@ -6,18 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CourseGradeDto {
-    private String accountId;
+public class CourseGradeInfoDto {
+    private Long problemId;
 
-    private String studentName;
+    private String problemName;
 
-    private int score;
-
-    private Status status;
-
-    private Long submitId;
+    private List<CourseGradeDto> courseGradeDtoList;
 }
